@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloud.artik.lwm2m.enums.DeviceEnum;
+import cloud.artik.lwm2m.enums.SupportedBinding;
 
 /*
  * This LWM2M Object provides a range of device related information which can be queried by the LWM2M Server, and a device reboot and factory reset function.
@@ -27,7 +28,9 @@ public class Device extends Resource {
     private static final Logger LOG = LoggerFactory.getLogger(Device.class);
 
     /*
-     * Creates a ArtikCloud Device
+     * Creates a ArtikCloud Device.
+     * 
+     * Default binding = UDP
      */
     public Device() {
         setUtcOffset(new SimpleDateFormat("X").format(Calendar.getInstance()
@@ -41,7 +44,7 @@ public class Device extends Resource {
      * Creates an ArtikCloud Device with 'static' information.
      */
     public Device(String manufacturer, String modelNumber, String serialNumber,
-            String supportedBinding) {
+            SupportedBinding supportedBinding) {
         this();
         setManufacturer(manufacturer, false);
         setModelNumber(modelNumber, false);
@@ -235,12 +238,21 @@ public class Device extends Resource {
 
     /*
      * Indicates which bindings and modes are supported in the LWM2M Client. The
-     * possible values of Resource are combination of "U" or "UQ" and "S" or
-     * "SQ"
+     * possible values of Resource are combination of "U" or "C"
      */
-    public String getSupportedBinding() {
-        return (String) this.resources.get(DeviceEnum.SUPPORTED_BINDING)
+    public SupportedBinding getSupportedBinding() {
+        String binding = (String) this.resources.get(DeviceEnum.SUPPORTED_BINDING)
                 .getValue();
+        
+        if (binding != null) {
+            if (binding.equalsIgnoreCase("U")) {
+                return SupportedBinding.UDP;
+            } else {
+                return SupportedBinding.TCP;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -303,12 +315,16 @@ public class Device extends Resource {
 
     /*
      * Indicates which bindings and modes are supported in the LWM2M Client. The
-     * possible values of Resource are combination of "U" or "UQ" and "S" or
-     * "SQ"
+     * possible values of Resource are combination of "U" or "T".
+     * 
+     * Default binding = UDP
      */
-    public void setSupportedBinding(String supportedBinding,
+    public void setSupportedBinding(SupportedBinding supportedBinding,
             boolean fireResourceChange) {
-        setResourceValue(DeviceEnum.SUPPORTED_BINDING, supportedBinding,
+        if (supportedBinding == null) {
+            supportedBinding = SupportedBinding.UDP;
+        }
+        setResourceValue(DeviceEnum.SUPPORTED_BINDING, supportedBinding.getBindingId(),
                 fireResourceChange);
     }
 

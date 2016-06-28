@@ -8,7 +8,6 @@ import org.eclipse.leshan.client.californium.LeshanClientBuilder;
 import org.eclipse.leshan.client.object.Security;
 import org.eclipse.leshan.client.object.Server;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
-import org.eclipse.leshan.core.request.BindingMode;
 import org.eclipse.leshan.util.Hex;
 
 /**
@@ -49,12 +48,20 @@ public class ArtikCloudClient {
             // Initialize object list
             ObjectsInitializer initializer = new ObjectsInitializer();
 
-            initializer.setInstancesForObject(LwM2mId.SECURITY, Security.psk(
-                    "coaps://coap-dev.artik.cloud:5686", serverID,
-                    deviceId.getBytes(),
-                    Hex.decodeHex(deviceToken.toCharArray())));
-            initializer.setInstancesForObject(LwM2mId.SERVER, new Server(
-                    serverID, LwM2mId.SRV_LIFETIME, BindingMode.U, false));
+            initializer.setInstancesForObject(
+                    LwM2mId.SECURITY, 
+                    Security.psk(
+                            "coaps://coap-dev.artik.cloud:5686", 
+                            serverID,
+                            deviceId.getBytes(),
+                            Hex.decodeHex(deviceToken.toCharArray())));
+            initializer.setInstancesForObject(
+                    LwM2mId.SERVER, 
+                    new Server(
+                            serverID, 
+                            LwM2mId.SRV_LIFETIME, 
+                            device.getSupportedBinding().toBindingMode(), 
+                            false));
 
             if (device == null) {
                 throw new NullPointerException("Device is null");
@@ -71,8 +78,11 @@ public class ArtikCloudClient {
             LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
             builder.setLocalAddress(null, 0);
             builder.setLocalSecureAddress(null, 0);
-            builder.setObjects(initializer.create(LwM2mId.SECURITY,
-                    LwM2mId.SERVER, LwM2mId.DEVICE));
+            builder.setObjects(
+                    initializer.create(
+                            LwM2mId.SECURITY,
+                            LwM2mId.SERVER, 
+                            LwM2mId.DEVICE));
             client = builder.build();
         }
 

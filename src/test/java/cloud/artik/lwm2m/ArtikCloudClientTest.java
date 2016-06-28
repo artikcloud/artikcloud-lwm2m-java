@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cloud.artik.lwm2m.enums.SupportedBinding;
+
 public class ArtikCloudClientTest {
     private static final Logger LOG = LoggerFactory.getLogger(ArtikCloudClientTest.class);
 
@@ -22,7 +24,7 @@ public class ArtikCloudClientTest {
     @Test
     public void testStart() throws Exception{
         
-        Device device = new Device("ArtikCloud", "1", "1", "U");
+        Device device = new Device("ArtikCloud", "1", "1", SupportedBinding.UDP);
         // Available Power Sources - Battery(0) and USB(5)
         HashMap<Integer, Long> availablePowerSources = new HashMap<Integer, Long>();
         availablePowerSources.put(new Integer(0), 0l);
