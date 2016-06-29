@@ -20,22 +20,24 @@ If using Eclipse,
 - import the SDK library project as "Existing Maven Projects".
 - right click the project, and choose "Run As" then "Maven install"
 
-- To use them in your Maven project, modify `pom.xml` file in your project to add dependency to sami-android-2.x.x.jar under `target` of the imported Maven project as following
-
-~~~
-<dependency>
-    <groupId>cloud.artik</groupId>
-    <artifactId>artikcloud-java</artifactId>
-    <version>2.0.0</version>
-    <scope>compile</scope>
-</dependency>
-~~~
-
 
 Usage
 ------
 
-Peek into [tests](https://github.com/artikcloud/artikcloud-java-lwm2m/tree/master/src/test/java/cloud/artik) for examples about how to use the SDK.
+Before using the LWM2M SDK to managing your devices, you need to first enable device management on your Device Type. <INSERT LINK TO DOCUMENTATION HERE>.
+
+After a device has been created in Artik Cloud, you need to create the device token and use the deviceId and deviceToken to instantiate the LWM2M Client as below:
+
+~~~
+        Device device = new Device("<Manufacturer>", "<ModelNumber>", "<SerialNumber>", SupportedBinding.UDP);
+        ArtikCloudClient client = new ArtikCloudClient("<DeviceID>", "<DeviceToken>", device);
+        // Start the registration process
+        client.start();
+~~~
+
+You can use a binding mode of UDP or TCP while registering the device.
+
+Peek into [tests](https://github.com/artikcloud/artikcloud-lwm2m-java/tree/master/src/test/java/cloud/artik/lwm2m) for examples about how to use the SDK.
 
 More about ARTIK Cloud
 ----------------------
