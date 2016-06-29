@@ -1,0 +1,7 @@
+#NOTE: This is an Aether internal implementation file, its format can be changed without prior notice.
+#Mon Jun 20 14:04:22 PDT 2016
+http\://repo.maven.apache.org/maven2/.lastUpdated=1466456662166
+http\://artifactory.samsungsami.io/artifactory/libs-release/.error=Could not transfer artifact org.eclipse.leshan\:leshan-core\:jar\:sources\:0.1.11-M10 from/to samihub-artifactory-releases (http\://artifactory.samsungsami.io/artifactory/libs-release)\: connect timed out
+http\://artifactory.samsungsami.io/artifactory/libs-snapshot/.error=Could not transfer artifact org.eclipse.leshan\:leshan-core\:jar\:sources\:0.1.11-M10 from/to samihub-artifactory-snapshots (http\://artifactory.samsungsami.io/artifactory/libs-snapshot)\: connect timed out
+26dede82079f88e7d67ffcc971c110bd11d42308@default-http\://artifactory.samsungsami.io/artifactory/libs-release/.lastUpdated=1466456651858
+26dede82079f88e7d67ffcc971c110bd11d42308@default-http\://artifactory.samsungsami.io/artifactory/libs-snapshot/.lastUpdated=1466456661865

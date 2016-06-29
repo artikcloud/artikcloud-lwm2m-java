@@ -1,0 +1,7 @@
+#NOTE: This is an Aether internal implementation file, its format can be changed without prior notice.
+#Mon Jun 20 10:47:35 PDT 2016
+http\://repo.maven.apache.org/maven2/.lastUpdated=1466444855806
+http\://artifactory.samsungsami.io/artifactory/libs-release/.error=Could not transfer artifact org.eclipse.leshan\:leshan-client-cf\:pom\:0.1.11-M10 from/to samihub-artifactory-releases (http\://artifactory.samsungsami.io/artifactory/libs-release)\: Access denied to http\://artifactory.samsungsami.io/artifactory/libs-release/org/eclipse/leshan/leshan-client-cf/0.1.11-M10/leshan-client-cf-0.1.11-M10.pom. Error code 403, Forbidden
+http\://artifactory.samsungsami.io/artifactory/libs-snapshot/.error=Could not transfer artifact org.eclipse.leshan\:leshan-client-cf\:pom\:0.1.11-M10 from/to samihub-artifactory-snapshots (http\://artifactory.samsungsami.io/artifactory/libs-snapshot)\: Access denied to http\://artifactory.samsungsami.io/artifactory/libs-snapshot/org/eclipse/leshan/leshan-client-cf/0.1.11-M10/leshan-client-cf-0.1.11-M10.pom. Error code 403, Forbidden
+26dede82079f88e7d67ffcc971c110bd11d42308@default-http\://artifactory.samsungsami.io/artifactory/libs-release/.lastUpdated=1466444853480
+26dede82079f88e7d67ffcc971c110bd11d42308@default-http\://artifactory.samsungsami.io/artifactory/libs-snapshot/.lastUpdated=1466444854760

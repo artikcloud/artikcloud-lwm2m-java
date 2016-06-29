@@ -30,6 +30,14 @@
     <developerConnection>scm:git:git@github.com:artikcloud/artikcloud-lwm2m.git</developerConnection>
     <url>https://github.com/artikcloud/artikcloud-lwm2m/java</url>
   </scm>
+  
+  <repositories>
+    <repository>
+      <id>in-project</id>
+      <name>In Project Repo</name>
+      <url>${project.baseUri}/libs</url>
+    </repository>
+  </repositories>
 
   <prerequisites>
     <maven>2.2.0</maven>
