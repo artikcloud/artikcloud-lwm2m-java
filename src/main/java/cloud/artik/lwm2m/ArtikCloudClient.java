@@ -51,7 +51,7 @@ public class ArtikCloudClient {
             initializer.setInstancesForObject(
                     LwM2mId.SECURITY, 
                     Security.psk(
-                            "coaps://coap-dev.artik.cloud:5686", 
+                            "coaps://coap.artik.cloud:5686", 
                             serverID,
                             deviceId.getBytes(),
                             Hex.decodeHex(deviceToken.toCharArray())));
