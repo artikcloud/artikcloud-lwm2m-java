@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.eclipse.leshan</groupId>
+  <artifactId>leshan-client-core</artifactId>
+  <versioning>
+    <release>0.1.11-M10-ARTIK-CLOUD</release>
+    <versions>
+      <version>0.1.11-M10-ARTIK-CLOUD</version>
+    </versions>
+    <lastUpdated>20160629201413</lastUpdated>
+  </versioning>
+</metadata>
