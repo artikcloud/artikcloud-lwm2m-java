@@ -3,10 +3,9 @@
   <groupId>org.eclipse.californium</groupId>
   <artifactId>scandium</artifactId>
   <versioning>
-    <release>1.0.3-ARTIK-CLOUD</release>
     <versions>
-      <version>1.0.3-ARTIK-CLOUD</version>
+      <version>1.0.3-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160629201301</lastUpdated>
+    <lastUpdated>20160718211907</lastUpdated>
   </versioning>
 </metadata>

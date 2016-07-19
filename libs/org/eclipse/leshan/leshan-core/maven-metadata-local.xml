@@ -3,10 +3,9 @@
   <groupId>org.eclipse.leshan</groupId>
   <artifactId>leshan-core</artifactId>
   <versioning>
-    <release>0.1.11-M10-ARTIK-CLOUD</release>
     <versions>
-      <version>0.1.11-M10-ARTIK-CLOUD</version>
+      <version>0.1.11-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160629201408</lastUpdated>
+    <lastUpdated>20160718212030</lastUpdated>
   </versioning>
 </metadata>
