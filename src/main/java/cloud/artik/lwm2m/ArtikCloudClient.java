@@ -2,22 +2,15 @@ package cloud.artik.lwm2m;
 
 import cloud.artik.lwm2m.enums.SupportedBinding;
 import org.eclipse.leshan.LwM2mId;
-import org.eclipse.leshan.ResponseCode;
-import org.eclipse.leshan.client.LwM2mTCPClient;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
+import org.eclipse.leshan.client.californium.LeshanTCPClient;
 import org.eclipse.leshan.client.californium.LeshanTCPClientBuilder;
 import org.eclipse.leshan.client.object.Security;
 import org.eclipse.leshan.client.object.Server;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
-import org.eclipse.leshan.client.util.LinkFormatHelper;
-import org.eclipse.leshan.core.request.BindingMode;
-import org.eclipse.leshan.core.request.DeregisterRequest;
-import org.eclipse.leshan.core.request.RegisterRequest;
-import org.eclipse.leshan.core.response.RegisterResponse;
 import org.eclipse.leshan.util.Hex;
 
-import java.net.InetSocketAddress;
 import java.util.Random;
 
 /**
@@ -28,6 +21,7 @@ import java.util.Random;
  */
 public class ArtikCloudClient {
     protected LeshanClient client = null;
+    protected LeshanTCPClient clientTCP = null;
     protected String deviceId = null;
     protected String deviceToken = null;
 
@@ -62,7 +56,20 @@ public class ArtikCloudClient {
             // Initialize object list
             ObjectsInitializer initializer = new ObjectsInitializer();
 
+            // Create common object instances
             initializer.setInstancesForObject(LwM2mId.DEVICE, this.device);
+            initializer.setInstancesForObject(
+                    LwM2mId.SERVER,
+                    new Server(
+                            serverID,
+                            LwM2mId.SRV_LIFETIME,
+                            device.getSupportedBinding().toBindingMode(),
+                            false));
+            /*
+             * LOCATION is not supported right now. if (location != null) {
+             * initializer.setInstancesForObject(LwM2mId.LOCATION,
+             * this.location); }
+             */
 
             if (device.getSupportedBinding() != SupportedBinding.TCP) {
                 initializer.setInstancesForObject(
@@ -72,19 +79,6 @@ public class ArtikCloudClient {
                                 serverID,
                                 deviceId.getBytes(),
                                 Hex.decodeHex(deviceToken.toCharArray())));
-                initializer.setInstancesForObject(
-                        LwM2mId.SERVER,
-                        new Server(
-                                serverID,
-                                LwM2mId.SRV_LIFETIME,
-                                device.getSupportedBinding().toBindingMode(),
-                                false));
-
-                /*
-                 * LOCATION is not supported right now. if (location != null) {
-                 * initializer.setInstancesForObject(LwM2mId.LOCATION,
-                 * this.location); }
-                 */
 
                 // Create client
                 LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
@@ -97,43 +91,27 @@ public class ArtikCloudClient {
                                 LwM2mId.DEVICE));
                 client = builder.build();
 
-                // Start the client
+                // Start the udp client
                 client.start();
             } else {
-                final LwM2mTCPClient client;
-                final InetSocketAddress serverAddress = new InetSocketAddress("coap-dev.artik.cloud", 5688);
-                final LeshanTCPClientBuilder builder = new LeshanTCPClientBuilder(deviceId);
+                // hostname and port for LwM2mId.SECURITY and LeshanTCPClientBuilder must be the same
+                initializer.setInstancesForObject(
+                        LwM2mId.SECURITY, 
+                        Security.noSec(
+                                "coap://coap-dev.artik.cloud:5688",
+                                serverID));
 
-                client = builder.setObjectsInitializer(initializer).setServerAddress(serverAddress).build();
-
-                client.start();
-
-                RegisterResponse response = client.send(new RegisterRequest(deviceId, (long) 3000, null, BindingMode.C, null,
-                        LinkFormatHelper.getClientDescription(client.getObjectEnablers(), null), null));
-                if (response == null) {
-                    System.out.println("Registration request timeout");
-                    return;
-                }
-
-                System.out.println("Device Registration (Success? " + response.getCode() + ")");
-                if (response.getCode() != ResponseCode.CREATED) {
-                    System.err.println("\tDevice Unable to connect.  Registration Error: " + response.getCode());
-                }
-
-                final String registrationID = response.getRegistrationID();
-                System.out.println("\tDevice: Registered Client Location '" + registrationID + "'");
-
-                // De-register on shutdown and stop client.
-                Runtime.getRuntime().addShutdownHook(new Thread() {
-                    @Override
-                    public void run() {
-                        if (registrationID != null) {
-                            System.out.println("\tDevice: De-registering Client '" + registrationID + "'");
-                            client.send(new DeregisterRequest(registrationID), 1000);
-                            client.stop();
-                        }
-                    }
-                });
+                // Create the tcp client
+                LeshanTCPClientBuilder builder = new LeshanTCPClientBuilder(deviceId, "coap-dev.artik.cloud", 5688);
+                builder.setObjects(
+                        initializer.create(
+                                LwM2mId.SECURITY, 
+                                LwM2mId.SERVER, 
+                                LwM2mId.DEVICE));
+                clientTCP = builder.build();
+                
+                // Start TCP client
+                clientTCP.start();
             }
         }
     }
@@ -150,16 +128,25 @@ public class ArtikCloudClient {
     public void close() {
         if (client != null)
             client.destroy(true);
+        
+        if (clientTCP != null)
+            clientTCP.destroy(true);
     }
 
     public void stop(boolean desregister) {
         if (client != null)
             client.stop(desregister);
+        
+        if (client != null)
+            clientTCP.stop();
     }
 
     public String getRegistrationId() {
-        if (client != null)
+        if (client != null) {
             return client.getRegistrationId();
+        } else if (clientTCP != null) {
+            return clientTCP.getRegistrationId();
+        }
         return null;
     }
 }
