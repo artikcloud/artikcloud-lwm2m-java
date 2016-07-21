@@ -8,9 +8,15 @@ import org.eclipse.leshan.client.californium.LeshanTCPClient;
 import org.eclipse.leshan.client.californium.LeshanTCPClientBuilder;
 import org.eclipse.leshan.client.object.Security;
 import org.eclipse.leshan.client.object.Server;
+import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
 import org.eclipse.leshan.util.Hex;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -20,6 +26,10 @@ import java.util.Random;
  * @author Maneesh Sahu
  */
 public class ArtikCloudClient {
+    private final String serverName = "coap-dev.artik.cloud";
+    private final int serverUDPPort = 5686;
+    private final int serverTCPPort = 5689;
+    
     protected LeshanClient client = null;
     protected LeshanTCPClient clientTCP = null;
     protected String deviceId = null;
@@ -52,12 +62,15 @@ public class ArtikCloudClient {
 
             Random rand = new Random();
             int serverID = rand.nextInt(Integer.MAX_VALUE);
+            String coapURL = "coaps://" + serverName + ":" +
+                    ((device.getSupportedBinding() != SupportedBinding.TCP) ? serverUDPPort : serverTCPPort);
 
             // Initialize object list
             ObjectsInitializer initializer = new ObjectsInitializer();
 
             // Create common object instances
             initializer.setInstancesForObject(LwM2mId.DEVICE, this.device);
+
             initializer.setInstancesForObject(
                     LwM2mId.SERVER,
                     new Server(
@@ -65,52 +78,43 @@ public class ArtikCloudClient {
                             LwM2mId.SRV_LIFETIME,
                             device.getSupportedBinding().toBindingMode(),
                             false));
+
+            initializer.setInstancesForObject(
+                    LwM2mId.SECURITY,
+                    Security.psk(
+                            coapURL,
+                            serverID,
+                            deviceId.getBytes(),
+                            Hex.decodeHex(deviceToken.toCharArray())));
+            
             /*
              * LOCATION is not supported right now. if (location != null) {
              * initializer.setInstancesForObject(LwM2mId.LOCATION,
              * this.location); }
              */
 
-            if (device.getSupportedBinding() != SupportedBinding.TCP) {
-                initializer.setInstancesForObject(
-                        LwM2mId.SECURITY,
-                        Security.psk(
-                                "coaps://coap-dev.artik.cloud:5686",
-                                serverID,
-                                deviceId.getBytes(),
-                                Hex.decodeHex(deviceToken.toCharArray())));
+            List<LwM2mObjectEnabler> objectEnablers = initializer.create(
+                    LwM2mId.SECURITY,
+                    LwM2mId.SERVER,
+                    LwM2mId.DEVICE);
 
-                // Create client
+
+            if (device.getSupportedBinding() != SupportedBinding.TCP) {
+                // Create udp client
                 LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
-                builder.setLocalAddress(null, 0);
-                builder.setLocalSecureAddress(null, 0);
-                builder.setObjects(
-                        initializer.create(
-                                LwM2mId.SECURITY,
-                                LwM2mId.SERVER,
-                                LwM2mId.DEVICE));
+                builder.setObjects(objectEnablers);
                 client = builder.build();
 
                 // Start the udp client
                 client.start();
             } else {
-                // hostname and port for LwM2mId.SECURITY and LeshanTCPClientBuilder must be the same
-                initializer.setInstancesForObject(
-                        LwM2mId.SECURITY, 
-                        Security.noSec(
-                                "coap://coap-dev.artik.cloud:5688",
-                                serverID));
-
                 // Create the tcp client
-                LeshanTCPClientBuilder builder = new LeshanTCPClientBuilder(deviceId, "coap-dev.artik.cloud", 5688);
-                builder.setObjects(
-                        initializer.create(
-                                LwM2mId.SECURITY, 
-                                LwM2mId.SERVER, 
-                                LwM2mId.DEVICE));
+                LeshanTCPClientBuilder builder = new LeshanTCPClientBuilder(deviceId, serverName, serverTCPPort);
+                builder.setObjects(objectEnablers);
+                builder.secure().setSSLContext(getTLSContext()).configure().configure();
                 clientTCP = builder.build();
-                
-                // Start TCP client
+
+                // Start the tcp client
                 clientTCP.start();
             }
         }
@@ -128,7 +132,7 @@ public class ArtikCloudClient {
     public void close() {
         if (client != null)
             client.destroy(true);
-        
+
         if (clientTCP != null)
             clientTCP.destroy(true);
     }
@@ -136,8 +140,8 @@ public class ArtikCloudClient {
     public void stop(boolean desregister) {
         if (client != null)
             client.stop(desregister);
-        
-        if (client != null)
+
+        if (clientTCP != null)
             clientTCP.stop();
     }
 
@@ -148,5 +152,36 @@ public class ArtikCloudClient {
             return clientTCP.getRegistrationId();
         }
         return null;
+    }
+
+    private SSLContext getTLSContext() {
+        SSLContext sslContext = null;
+
+        // Install the all-trusting trust manager
+        try {
+            // Create a trust manager that does not validate certificate chains
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+
+            sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+        } catch (Exception e) {
+            //
+        }
+
+        return sslContext;
     }
 }
