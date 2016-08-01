@@ -145,6 +145,51 @@ public class Device extends Resource {
         return (String) this.resources.get(DeviceEnum.FIRMWARE_VERSION)
                 .getValue();
     }
+    
+    /*
+     * Current software version
+     */
+    public String getSoftwareVersion() {
+        return (String) this.resources.get(DeviceEnum.SOFTWARE_VERSION)
+                .getValue();
+    }
+    
+    /*
+     * Current hardware version
+     */
+    public String getHardwareVersion() {
+        return (String) this.resources.get(DeviceEnum.HARDWARE_VERSION)
+                .getValue();
+    }
+    
+    /*
+     * This value is only valid when the value of Available Power Sources Resource is 1.
+     * 0 Normal - The battery is operating normally and not on power.
+     * 1 Charging - The battery is currently charging.
+     * 2 Charge Complete - The battery is fully charged and still on power.
+     * 3 Damaged - The battery has some problem.
+     * 4 Low Battery - The battery is low on charge. 
+     * 5 Not Installed - The battery is not installed. 
+     * 6 Unknown - The battery information is not available.
+     */
+    public Long getBatteryStatus() {
+        return (Long) this.resources.get(DeviceEnum.BATTERY_STATUS).getValue();
+    }
+
+    /*
+     * Total amount of storage space which can store data and software
+     * in the LWM2M Device (expressed in kilobytes).
+     */
+    public Long getMemoryTotal() {
+        return (Long) this.resources.get(DeviceEnum.MEMORY_TOTAL).getValue();
+    }
+    
+    /*
+     * Type of the device (manufacturer specified string : e.g. smart meters / dev Class)
+     */
+    public String getDeviceType() {
+        return (String) this.resources.get(DeviceEnum.DEVICE_TYPE).getValue();
+    }
 
     /*
      * 0 – DC power 1 – Internal Battery 2 – External Battery 4 – Power over
@@ -396,4 +441,57 @@ public class Device extends Resource {
     public void setMemoryFree(long memoryFree, boolean fireResourceChange) {
         setResourceValue(DeviceEnum.MEMORY_FREE, memoryFree, fireResourceChange);
     }
+    
+    /*
+     * Type of the device (manufacturer specified string : e.g. smart meters / dev Class)
+     */
+    public void setDeviceType(String deviceType, boolean fireResourceChange) {
+        setResourceValue(DeviceEnum.DEVICE_TYPE, deviceType, fireResourceChange);
+    }
+    
+    /*
+     * Current hardware version
+     */
+    public void setHardwareVersion(String hardwareVersion,
+            boolean fireResourceChange) {
+        setResourceValue(DeviceEnum.HARDWARE_VERSION, hardwareVersion,
+                fireResourceChange);
+    }
+    
+    /*
+     * Current software version. 
+     * On elaborated LWM2M device, SW could be split in 2 parts : a 
+     * firmware one and a higher level software on top.
+     * Both pieces ofSoftware are together managed by LWM2M Firmware  
+     * Update Object (Object ID 5)
+     */
+    public void setSoftwareVersion(String softwareVersion,
+            boolean fireResourceChange) {
+        setResourceValue(DeviceEnum.SOFTWARE_VERSION, softwareVersion,
+                fireResourceChange);
+    }
+    
+    /*
+     * Total amount of storage space which can store data and software
+     * in the LWM2M Device (expressed in kilobytes).
+     */
+    public void setMemoryTotal(long memoryTotal, boolean fireResourceChange) {
+        setResourceValue(DeviceEnum.MEMORY_TOTAL, memoryTotal, fireResourceChange);
+    }
+    
+    /*
+     * This value is only valid when the value of Available Power Sources Resource is 1.
+     * 0 Normal - The battery is operating normally and not on power.
+     * 1 Charging - The battery is currently charging.
+     * 2 Charge Complete - The battery is fully charged and still on power.
+     * 3 Damaged - The battery has some problem.
+     * 4 Low Battery - The battery is low on charge. 
+     * 5 Not Installed - The battery is not installed. 
+     * 6 Unknown - The battery information is not available.
+     */
+    public void setBatteryStatus(long batteryStatus, boolean fireResourceChange) {
+        setResourceValue(DeviceEnum.BATTERY_STATUS, batteryStatus,
+                fireResourceChange);
+    }
+    
 }
