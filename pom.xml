@@ -135,18 +135,26 @@
         </configuration>
       </plugin>
       <plugin>
-          <artifactId>maven-assembly-plugin</artifactId>
+          <artifactId>maven-shade-plugin</artifactId>
           <version>2.3</version>
           <configuration>
               <descriptorRefs>
                   <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
+              <filters>
+                  <filter>
+                      <artifact>org.eclipse.leshan:leshan-core</artifact>
+                      <excludes>
+                          <exclude>oma-objects-spec.json</exclude>
+                      </excludes>
+                  </filter>
+              </filters>              
           </configuration>
           <executions>
               <execution>
                   <phase>package</phase>
                   <goals>
-                      <goal>single</goal>
+                      <goal>shade</goal>
                   </goals>
               </execution>
           </executions>
