@@ -32,6 +32,8 @@ public class ArtikCloudClientTest {
         device.setAvailablePowerSources(availablePowerSources, false);
 
         ArtikCloudClient client = new ArtikCloudClient("24936ceccdb24a54a58a341ee7c5d1a3", "2f1a098e131b4d4c9aaaaf38bb06df87", device);
+        // TBD: Remove when PROD push
+        client.setServerName("coap-dev.artik.cloud");
         
         // Register
         client.start();
@@ -43,7 +45,6 @@ public class ArtikCloudClientTest {
         client.stop(true);
         // Finish
         client.close();
-        
     }
 
 }

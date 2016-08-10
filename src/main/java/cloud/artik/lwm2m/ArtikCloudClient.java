@@ -26,7 +26,6 @@ import java.util.Random;
  * @author Maneesh Sahu
  */
 public class ArtikCloudClient {
-    private final String serverName = "coap-dev.artik.cloud";
     private final int serverUDPPort = 5686;
     private final int serverTCPPort = 5689;
     
@@ -34,21 +33,48 @@ public class ArtikCloudClient {
     protected LeshanTCPClient clientTCP = null;
     protected String deviceId = null;
     protected String deviceToken = null;
+    protected int shortServerID = -1;
+    protected long lifetime = LwM2mId.SRV_LIFETIME;
+    protected boolean notifyWhenDisable = false;
+    protected String serverName = "coap.artik.cloud";
 
     protected Device device = null;
     protected Location location = null;
 
     /**
-     * Initialize the LWM2M Client with the DeviceId and the DeviceToken. Start
-     * the registration process with start().
+     * Initialize the LWM2M Client with the DeviceId and the DeviceToken. 
+     * This sets the shortServerID to a random Integer, the lifetime to LwM2mId.SRV_LIFETIME
+     * and notifyWhenDisable to false.
+     * 
+     * Start the registration process with start().
      *
      * @param deviceId
      * @param deviceToken
+     * @param device
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device) {
+        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE),  LwM2mId.SRV_LIFETIME, false);
+    }
+    
+    /**
+     * Initialize the LWM2M Client with the DeviceId, DeviceToken, shortServerId, lifetime and notifyWhenDisable.
+     *  
+     * Start the registration process with start().
+     *
+     * @param deviceId
+     * @param deviceToken
+     * @param device
+     * @param shortServerID - Short Server ID
+     * @param lifetime - Registration Lifetime
+     * @param notifyWhenDisable - Notify When Disable 
+     */
+    public ArtikCloudClient(String deviceId, String deviceToken, Device device, int shortServerID, long lifetime, boolean notifyWhenDisable) {
         this.deviceId = deviceId;
         this.deviceToken = deviceToken;
         this.device = device;
+        this.shortServerID = shortServerID;
+        this.lifetime = lifetime;
+        this.notifyWhenDisable = notifyWhenDisable;
     }
 
     /**
@@ -60,8 +86,6 @@ public class ArtikCloudClient {
                 throw new NullPointerException("Device is null");
             }
 
-            Random rand = new Random();
-            int serverID = rand.nextInt(Integer.MAX_VALUE);
             String coapURL = "coaps://" + serverName + ":" +
                     ((device.getSupportedBinding() != SupportedBinding.TCP) ? serverUDPPort : serverTCPPort);
 
@@ -70,20 +94,20 @@ public class ArtikCloudClient {
 
             // Create common object instances
             initializer.setInstancesForObject(LwM2mId.DEVICE, this.device);
-
+            
             initializer.setInstancesForObject(
                     LwM2mId.SERVER,
                     new Server(
-                            serverID,
-                            LwM2mId.SRV_LIFETIME,
+                            this.shortServerID,
+                            this.lifetime,
                             device.getSupportedBinding().toBindingMode(),
-                            false));
+                            this.notifyWhenDisable));
 
             initializer.setInstancesForObject(
                     LwM2mId.SECURITY,
                     Security.psk(
                             coapURL,
-                            serverID,
+                            this.shortServerID,
                             deviceId.getBytes(),
                             Hex.decodeHex(deviceToken.toCharArray())));
             
@@ -129,6 +153,10 @@ public class ArtikCloudClient {
         this.location = location;
     }*/
 
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+    
     public void close() {
         if (client != null)
             client.destroy(true);
