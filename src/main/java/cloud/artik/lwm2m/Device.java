@@ -25,7 +25,7 @@ import cloud.artik.lwm2m.enums.SupportedBinding;
  * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Device-v1_0.xml 
  */
 public class Device extends Resource {
-    private static final Logger LOG = LoggerFactory.getLogger(Device.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Device.class);
 
     /*
      * Creates a ArtikCloud Device.
@@ -74,21 +74,21 @@ public class Device extends Resource {
     @Override
     public ReadResponse read(int resourceId) {
         DeviceEnum resource = DeviceEnum.values()[resourceId];
-        LOG.info("read( resourceId: " + resource + ")");
+        LOGGER.info("read( resourceId: " + resource + ")");
         if (this.resources.containsKey(resource)) {
             LwM2mResource value = this.resources.get(resource);
-            LOG.info("value: " + value);
+            LOGGER.info("value: " + value);
             return ReadResponse.success(value);
         } else {
             switch (resource) {
             case CURRENT_TIME:
                 Date value = getCurrentTime();
-                LOG.info("value: " + value);
+                LOGGER.info("value: " + value);
                 return ReadResponse.success(resource.getResourceId(), value);
             case REBOOT:
             case FACTORY_RESET:
             default:
-                LOG.info(" default");
+                LOGGER.info(" default");
                 return super.read(resourceId);
             }
         }
@@ -97,7 +97,7 @@ public class Device extends Resource {
     @Override
     public ExecuteResponse execute(int resourceId, String params) {
         if (params != null && params.length() != 0)
-            LOG.info("params: " + params);
+            LOGGER.info("params: " + params);
         return ExecuteResponse.success();
     }
 

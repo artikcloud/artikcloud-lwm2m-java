@@ -7,7 +7,7 @@
   <name>artikcloud-lwm2m</name>
   <version>1.0.0</version>
   <description>Artik Cloud LWM2M Java SDK</description>
-  <url>https://github.com/artikcloud/artikcloud-lwm2m/java</url>
+  <url>https://github.com/artikcloud/artikcloud-lwm2m-java</url>
 
   <licenses>
       <license>
@@ -26,9 +26,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:artikcloud/artikcloud-lwm2m.git</connection>
-    <developerConnection>scm:git:git@github.com:artikcloud/artikcloud-lwm2m.git</developerConnection>
-    <url>https://github.com/artikcloud/artikcloud-lwm2m/java</url>
+    <connection>scm:git:git@github.com:artikcloud/artikcloud-lwm2m-java.git</connection>
+    <developerConnection>scm:git:git@github.com:artikcloud/artikcloud-lwm2m-java.git</developerConnection>
+    <url>https://github.com/artikcloud/artikcloud-lwm2m-java</url>
   </scm>
   
   <repositories>

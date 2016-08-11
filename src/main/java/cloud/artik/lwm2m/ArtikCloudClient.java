@@ -1,6 +1,13 @@
 package cloud.artik.lwm2m;
 
-import cloud.artik.lwm2m.enums.SupportedBinding;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Random;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
@@ -11,13 +18,10 @@ import org.eclipse.leshan.client.object.Server;
 import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
 import org.eclipse.leshan.util.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Random;
+import cloud.artik.lwm2m.enums.SupportedBinding;
 
 /**
  * This is the main entry point for setting up and registering the Lwm2m client
@@ -26,6 +30,8 @@ import java.util.Random;
  * @author Maneesh Sahu
  */
 public class ArtikCloudClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArtikCloudClient.class);
+
     private final int serverUDPPort = 5686;
     private final int serverTCPPort = 5689;
     
@@ -40,6 +46,7 @@ public class ArtikCloudClient {
 
     protected Device device = null;
     protected Location location = null;
+    protected FirmwareUpdate updater = null;
 
     /**
      * Initialize the LWM2M Client with the DeviceId and the DeviceToken. 
@@ -116,12 +123,23 @@ public class ArtikCloudClient {
              * initializer.setInstancesForObject(LwM2mId.LOCATION,
              * this.location); }
              */
-
-            List<LwM2mObjectEnabler> objectEnablers = initializer.create(
-                    LwM2mId.SECURITY,
-                    LwM2mId.SERVER,
-                    LwM2mId.DEVICE);
-
+            
+            List<LwM2mObjectEnabler> objectEnablers = null;
+            
+            if (this.updater != null) {
+                initializer.setInstancesForObject(LwM2mId.FIRMWARE, this.updater);
+                
+                objectEnablers = initializer.create(
+                        LwM2mId.SECURITY,
+                        LwM2mId.SERVER,
+                        LwM2mId.DEVICE,
+                        LwM2mId.FIRMWARE);                
+            } else {
+                objectEnablers = initializer.create(
+                        LwM2mId.SECURITY,
+                        LwM2mId.SERVER,
+                        LwM2mId.DEVICE);
+            }
 
             if (device.getSupportedBinding() != SupportedBinding.TCP) {
                 // Create udp client
@@ -152,6 +170,14 @@ public class ArtikCloudClient {
     public void setLocation(Location location) {
         this.location = location;
     }*/
+    
+    public FirmwareUpdate getFirmwareUpdate() {
+        return updater;
+    }
+    
+    public void setFirmwareUpdate(FirmwareUpdate updater) {
+        this.updater = updater;
+    }
 
     public void setServerName(String serverName) {
         this.serverName = serverName;
@@ -190,14 +216,17 @@ public class ArtikCloudClient {
             // Create a trust manager that does not validate certificate chains
             TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
+                        @Override
                         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                             return new X509Certificate[0];
                         }
 
+                        @Override
                         public void checkClientTrusted(
                                 java.security.cert.X509Certificate[] certs, String authType) {
                         }
 
+                        @Override
                         public void checkServerTrusted(
                                 java.security.cert.X509Certificate[] certs, String authType) {
                         }

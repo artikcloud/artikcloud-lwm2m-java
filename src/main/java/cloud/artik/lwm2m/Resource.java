@@ -42,7 +42,27 @@ public abstract class Resource extends BaseInstanceEnabler {
             updateResources(resource.getResourceId());
         }
     }
+    
+    protected void setResourceValue(Lwm2mEnum resource, Integer value,
+            boolean fireResourceChange) {
+        LwM2mResource rValue = LwM2mSingleResource.newIntegerResource(
+                resource.getResourceId(), value);
+        this.resources.put(resource, rValue);
+        if (fireResourceChange) {
+            updateResources(resource.getResourceId());
+        }
+    }
 
+    protected void setResourceValue(Lwm2mEnum resource, boolean value,
+            boolean fireResourceChange) {
+        LwM2mResource rValue = LwM2mSingleResource.newBooleanResource(
+                resource.getResourceId(), value);
+        this.resources.put(resource, rValue);
+        if (fireResourceChange) {
+            updateResources(resource.getResourceId());
+        }
+    }
+    
     protected void setResourceValue(Lwm2mEnum resource, Date value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newDateResource(

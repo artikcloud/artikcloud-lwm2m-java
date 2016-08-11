@@ -26,7 +26,7 @@ public abstract class Location extends Resource {
     private static final Logger LOG = LoggerFactory.getLogger(Location.class);
 
     /*
-     * Creates a ArtikCloud Location
+     * Default constructor.
      */
     public Location() {
     }
@@ -72,6 +72,10 @@ public abstract class Location extends Resource {
         return (String) this.resources.get(LATITUDE).getValue();
     }
 
+    /*
+     * The decimal notation of latitude, e.g. -43.5723 [World Geodetic System
+     * 1984].
+     */
     public void setLatitude(String latitude, boolean fireResourceChange) {
         setResourceValue(LATITUDE, latitude, fireResourceChange);
     }
@@ -84,6 +88,10 @@ public abstract class Location extends Resource {
         return (String) this.resources.get(LONGITUDE).getValue();
     }
 
+    /*
+     * The decimal notation of longitude, e.g. 153.21760 [World Geodetic System
+     * 1984].
+     */
     public void setLongitude(String longitude, boolean fireResourceChange) {
         setResourceValue(LONGITUDE, longitude, fireResourceChange);
     }
@@ -96,6 +104,9 @@ public abstract class Location extends Resource {
 
     }
 
+    /*
+     * The decimal notation of altitude in meters above sea level.
+     */
     public void setAltitude(String altitude, boolean fireResourceChange) {
         setResourceValue(ALTITUDE, altitude, fireResourceChange);
     }
@@ -108,6 +119,9 @@ public abstract class Location extends Resource {
 
     }
 
+    /*
+     * The accuracy of the position in meters.
+     */
     public void setUncertainity(String uncertainity, boolean fireResourceChange) {
         setResourceValue(UNCERTAINITY, uncertainity, fireResourceChange);
     }
@@ -120,6 +134,10 @@ public abstract class Location extends Resource {
         return (String) this.resources.get(VELOCITY).getValue();
     }
 
+    /*
+     * The velocity of the device as defined in 3GPP 23.032 GAD specification.
+     * This set of values may not be available if the device is static.
+     */
     public void setVelocity(String velocity, boolean fireResourceChange) {
         setResourceValue(VELOCITY, velocity, fireResourceChange);
     }
