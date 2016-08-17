@@ -78,7 +78,7 @@ public class ArtikCloudClientTest {
             }
             
             @Override
-            public FirmwareUpdateResult updateFirmware() {
+            public FirmwareUpdateResult executeUpdateFirmware() {
                 ArtikCloudClientTest.LOGGER.info("update firmware");
                 
                 try {

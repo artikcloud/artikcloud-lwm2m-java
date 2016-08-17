@@ -754,6 +754,28 @@
         "range": "0-6",
         "units": "",
         "description": ""
+      },
+      {
+        "id": 6,
+        "name": "PkgName",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "0-255 bytes",
+        "units": "",
+        "description": ""
+      },
+      {
+        "id": 7,
+        "name": "PkgVersion",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "0-255 bytes",
+        "units": "",
+        "description": ""
       }
     ]
   },

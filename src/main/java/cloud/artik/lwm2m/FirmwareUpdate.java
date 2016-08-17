@@ -15,17 +15,43 @@ import cloud.artik.lwm2m.enums.FirmwareUpdateEnum;
 import cloud.artik.lwm2m.enums.FirmwareUpdateResult;
 import cloud.artik.lwm2m.enums.FirmwareUpdateState;
 
+/**
+ * This LWM2M Object enables management of firmware which is to be updated. 
+ * This Object includes installing firmware package, updating firmware, and performing actions after updating firmware.
+ * 
+ * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Firmware_Update-v1_0.xml
+ * @author Maneesh Sahu
+ *
+ */
 public abstract class FirmwareUpdate extends Resource {
     public final static Logger LOGGER = LoggerFactory.getLogger(FirmwareUpdate.class);
 
+    /**
+     * Default Constructor. 
+     * State initialized to IDLE(1), UpdateResult to DEFAULT(0)
+     */
     public FirmwareUpdate() {
         setState(FirmwareUpdateState.IDLE, false);
         setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
     }
     
+    /**
+     * This method needs to be overriden, to download the firmware package.
+     * 
+     * @param packageUri - URI from where the device can download the firmware package by an alternative mechanism. 
+     *        As soon the device has received the Package URI it performs the download at the next practical opportunity.
+     * @return FirmwareUpdateResult
+     */
     public abstract FirmwareUpdateResult downloadPackage(String packageUri);
     
-    public abstract FirmwareUpdateResult updateFirmware();
+    /**
+     * This methods needs to be overridden, to update the firmware using the firmware package.
+     * Updates firmware by using the firmware package stored in Package, or, by using the firmware downloaded from the Package URI. 
+     * This Resource is only executable when the value of the State Resource is Downloaded.
+     * 
+     * @return FirmwareUpdateResult
+     */
+    public abstract FirmwareUpdateResult executeUpdateFirmware();
 
     
     @Override
@@ -110,7 +136,7 @@ public abstract class FirmwareUpdate extends Resource {
                 public void run() {
                     // perform upgrade
                     try {
-                        FirmwareUpdateResult result = updateFirmware();
+                        FirmwareUpdateResult result = executeUpdateFirmware();
                             
                         setUpdateResult(result, true);
                         if (result == FirmwareUpdateResult.SUCCESS) {
@@ -141,7 +167,7 @@ public abstract class FirmwareUpdate extends Resource {
      * If performing the Update Resource was successful, the state changes from Downloaded to Idle.
      */
     public FirmwareUpdateState getState() {
-        return FirmwareUpdateState.values()[((Long) this.resources.get(UPDATE_RESULT).getValue()).intValue() - 1];
+        return FirmwareUpdateState.values()[((Long) this.resources.get(STATE).getValue()).intValue() - 1];
     }
     
     protected void setState(FirmwareUpdateState state, boolean fireResourceChange) {

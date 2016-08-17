@@ -73,6 +73,7 @@ public abstract class Device extends Resource {
     
     /**
      * Reboot the LWM2M Device to restore the Device from unexpected firmware failure.
+     * 
      * @return ExecuteResponse
      */
     public abstract ExecuteResponse executeReboot();
@@ -80,6 +81,7 @@ public abstract class Device extends Resource {
     /**
      * Perform factory reset of the LWM2M Device to make the LWM2M Device have the same configuration as at the initial deployment.
      * When this Resource is executed, “De-register” operation MAY be sent to the LWM2M Server(s) before factory reset of the LWM2M Device.
+     * 
      * @return ExecuteResponse
      */
     public abstract ExecuteResponse executeFactoryReset();

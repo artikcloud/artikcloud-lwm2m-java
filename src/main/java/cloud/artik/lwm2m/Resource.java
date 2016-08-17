@@ -7,7 +7,6 @@ import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.core.node.LwM2mMultipleResource;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.LwM2mSingleResource;
-import org.eclipse.leshan.core.response.WriteResponse;
 
 import cloud.artik.lwm2m.enums.Lwm2mEnum;
 
@@ -17,7 +16,7 @@ import cloud.artik.lwm2m.enums.Lwm2mEnum;
  * @author Maneesh Sahu
  * 
  */
-public abstract class Resource extends BaseInstanceEnabler {
+abstract class Resource extends BaseInstanceEnabler {
     protected final HashMap<Lwm2mEnum, LwM2mResource> resources = new HashMap<Lwm2mEnum, LwM2mResource>();
 
     protected void updateResources(int... resourceIds) {

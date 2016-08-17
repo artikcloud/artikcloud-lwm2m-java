@@ -24,9 +24,14 @@ import org.slf4j.LoggerFactory;
 import cloud.artik.lwm2m.enums.SupportedBinding;
 
 /**
+ * This LWM2M Objects provides the data related to a LWM2M Server and also provides the keying material of a LWM2M Client 
+ * appropriate to access a specified LWM2M Server. One Object Instance SHOULD address a LWM2M Bootstrap Server.
  * This is the main entry point for setting up and registering the Lwm2m client
- * with Artik Cloud Device Management services.
+ * with the Artik Cloud Device Management services.
+ * 
  *
+ * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Security-v1_0.xml
+ * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Server-v1_0.xml
  * @author Maneesh Sahu
  */
 public class ArtikCloudClient {
@@ -51,7 +56,7 @@ public class ArtikCloudClient {
     /**
      * Initialize the LWM2M Client with the DeviceId and the DeviceToken. 
      * This sets the shortServerID to a random Integer, the lifetime to LwM2mId.SRV_LIFETIME
-     * and notifyWhenDisable to false.
+     * and notifyWhenDisable to true.
      * 
      * Start the registration process with start().
      *
@@ -60,7 +65,7 @@ public class ArtikCloudClient {
      * @param device
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device) {
-        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE),  LwM2mId.SRV_LIFETIME, false);
+        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE),  LwM2mId.SRV_LIFETIME, true);
     }
     
     /**
@@ -71,9 +76,12 @@ public class ArtikCloudClient {
      * @param deviceId
      * @param deviceToken
      * @param device
-     * @param shortServerID - Short Server ID
-     * @param lifetime - Registration Lifetime
-     * @param notifyWhenDisable - Notify When Disable 
+     * @param shortServerID - Used as link to associate server Object Instance (1-65535)
+     * @param lifetime - Specify the lifetime of the registration in seconds.
+     * @param notifyWhenDisable - If true, the LWM2M Client stores “Notify” operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline. 
+     *                            After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored “Notify” operations to the Server.
+     *                            If false, the LWM2M Client discards all the “Notify” operationsor temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.
+     *                            The default value is true. The maximum number of storing Notification per the Server is up to the implementation.
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device, int shortServerID, long lifetime, boolean notifyWhenDisable) {
         this.deviceId = deviceId;
