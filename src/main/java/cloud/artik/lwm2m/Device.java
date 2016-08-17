@@ -24,7 +24,7 @@ import cloud.artik.lwm2m.enums.SupportedBinding;
  *
  * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Device-v1_0.xml 
  */
-public class Device extends Resource {
+public abstract class Device extends Resource {
     private static final Logger LOGGER = LoggerFactory.getLogger(Device.class);
 
     /*
@@ -70,6 +70,31 @@ public class Device extends Resource {
             }
         }, delay, period);
     }
+    
+    /**
+     * Reboot the LWM2M Device to restore the Device from unexpected firmware failure.
+     * @return ExecuteResponse
+     */
+    public abstract ExecuteResponse executeReboot();
+    
+    /**
+     * Perform factory reset of the LWM2M Device to make the LWM2M Device have the same configuration as at the initial deployment.
+     * When this Resource is executed, “De-register” operation MAY be sent to the LWM2M Server(s) before factory reset of the LWM2M Device.
+     * @return ExecuteResponse
+     */
+    public abstract ExecuteResponse executeFactoryReset();
+    
+    /**
+     * Delete all error code Resource Instances and create only one zero-value error code that implies no error.
+     * Override to change functionality.
+     * 
+     * @return ExecuteResponse
+     */
+    protected ExecuteResponse executeResetErrorCode() {
+        setErrorCode(0, true);
+        return ExecuteResponse.success();
+    }
+    
 
     @Override
     public ReadResponse read(int resourceId) {
@@ -98,7 +123,15 @@ public class Device extends Resource {
     public ExecuteResponse execute(int resourceId, String params) {
         if (params != null && params.length() != 0)
             LOGGER.info("params: " + params);
-        return ExecuteResponse.success();
+        DeviceEnum resource = DeviceEnum.values()[resourceId];
+        switch (resource) {
+        case REBOOT: return executeReboot();
+        case FACTORY_RESET: return executeFactoryReset();
+        case RESET_ERROR_CODE: return executeResetErrorCode();
+        default:
+            return ExecuteResponse.success();
+        }
+        
     }
 
     @Override

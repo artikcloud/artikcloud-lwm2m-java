@@ -13,7 +13,7 @@ public enum FirmwareUpdateState {
        this.stateId = stateId;
    }
    
-   public Integer getStateAsInteger() {
-       return new Integer(this.stateId);
+   public Long getStateAsLong() {
+       return new Long(this.stateId);
    }
 }

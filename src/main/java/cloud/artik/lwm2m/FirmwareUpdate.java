@@ -141,11 +141,11 @@ public abstract class FirmwareUpdate extends Resource {
      * If performing the Update Resource was successful, the state changes from Downloaded to Idle.
      */
     public FirmwareUpdateState getState() {
-        return FirmwareUpdateState.values()[((Integer) this.resources.get(UPDATE_RESULT).getValue()).intValue() - 1];
+        return FirmwareUpdateState.values()[((Long) this.resources.get(UPDATE_RESULT).getValue()).intValue() - 1];
     }
     
     protected void setState(FirmwareUpdateState state, boolean fireResourceChange) {
-        setResourceValue(STATE, state.getStateAsInteger(), fireResourceChange);
+        setResourceValue(STATE, state.getStateAsLong(), fireResourceChange);
     }
     
     /*
@@ -195,7 +195,7 @@ public abstract class FirmwareUpdate extends Resource {
      * This Resource MAY be reported by sending Observe operation.
      */
     public FirmwareUpdateResult getUpdateResult() {
-        return FirmwareUpdateResult.values()[((Integer) this.resources.get(UPDATE_RESULT).getValue()).intValue()];
+        return FirmwareUpdateResult.values()[((Long) this.resources.get(UPDATE_RESULT).getValue()).intValue()];
     }
     
     /*
@@ -213,7 +213,7 @@ public abstract class FirmwareUpdate extends Resource {
      * This Resource MAY be reported by sending Observe operation.
      */
     public void setUpdateResult(FirmwareUpdateResult updateResult, boolean fireResourceChange) {
-        setResourceValue(UPDATE_RESULT, updateResult.getResultAsInteger(), fireResourceChange);
+        setResourceValue(UPDATE_RESULT, updateResult.getResultAsLong(), fireResourceChange);
     }
 
 }

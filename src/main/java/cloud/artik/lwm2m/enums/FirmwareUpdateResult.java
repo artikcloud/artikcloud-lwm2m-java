@@ -23,7 +23,7 @@ public enum FirmwareUpdateResult {
        this.resultId = resultId;
    }
    
-   public Integer getResultAsInteger() {
-       return new Integer(this.resultId);
+   public Long getResultAsLong() {
+       return new Long(this.resultId);
    }
 }
