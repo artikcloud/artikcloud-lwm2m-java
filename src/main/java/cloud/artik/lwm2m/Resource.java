@@ -7,6 +7,7 @@ import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.core.node.LwM2mMultipleResource;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.LwM2mSingleResource;
+import org.eclipse.leshan.core.response.WriteResponse;
 
 import cloud.artik.lwm2m.enums.Lwm2mEnum;
 
@@ -22,64 +23,53 @@ public abstract class Resource extends BaseInstanceEnabler {
     protected void updateResources(int... resourceIds) {
         fireResourcesChange(resourceIds);
     }
+    
+    protected void setResourceValue(Lwm2mEnum resource, LwM2mResource value, boolean fireResourceChange) {
+        this.resources.put(resource, value);
+        if (fireResourceChange) {
+            updateResources(resource.getResourceId());
+        }
+    }
 
     protected void setResourceValue(Lwm2mEnum resource, String value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newStringResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
 
     protected void setResourceValue(Lwm2mEnum resource, Long value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newIntegerResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
     
     protected void setResourceValue(Lwm2mEnum resource, Integer value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newIntegerResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
 
     protected void setResourceValue(Lwm2mEnum resource, boolean value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newBooleanResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
     
     protected void setResourceValue(Lwm2mEnum resource, Date value,
             boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mSingleResource.newDateResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
 
     protected void setResourceValue(Lwm2mEnum resource,
             HashMap<Integer, Long> value, boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mMultipleResource.newIntegerResource(
                 resource.getResourceId(), value);
-        this.resources.put(resource, rValue);
-        if (fireResourceChange) {
-            updateResources(resource.getResourceId());
-        }
+        setResourceValue(resource, rValue, fireResourceChange);
     }
 }

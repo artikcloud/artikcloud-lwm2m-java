@@ -2,6 +2,7 @@ package cloud.artik.lwm2m;
 
 import java.util.HashMap;
 
+import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,28 @@ public class ArtikCloudClientTest {
     @Test
     public void testStart() throws Exception{
         
-        final Device device = new Device("ArtikCloud", "1", "1", SupportedBinding.UDP);
+        final Device device = new Device("ArtikCloud", "1", "1", SupportedBinding.UDP) {
+            
+            @Override
+            public ExecuteResponse executeReboot() {
+                ArtikCloudClientTest.LOGGER.info("executeReboot");
+                return ExecuteResponse.success();
+            }
+            
+            @Override
+            public ExecuteResponse executeFactoryReset() {
+                ArtikCloudClientTest.LOGGER.info("executeFactoryReset");
+                return ExecuteResponse.success();
+            }
+            
+            @Override
+            protected ExecuteResponse executeResetErrorCode() {
+                ArtikCloudClientTest.LOGGER.info("executeResetErrorCode");
+                return super.executeResetErrorCode();
+            }
+        };
+        
+        
         // Available Power Sources - Battery(0) and USB(5)
         HashMap<Integer, Long> availablePowerSources = new HashMap<Integer, Long>();
         availablePowerSources.put(new Integer(0), 0l);
@@ -42,7 +64,7 @@ public class ArtikCloudClientTest {
             
             @Override
             public FirmwareUpdateResult downloadPackage(String packageUri) {
-                ArtikCloudClientTest.LOGGER.debug("download package: " + packageUri);
+                ArtikCloudClientTest.LOGGER.info("download package: " + packageUri);
                 
                 try {
                     Thread.sleep(1000);
@@ -57,7 +79,7 @@ public class ArtikCloudClientTest {
             
             @Override
             public FirmwareUpdateResult updateFirmware() {
-                LOGGER.debug("update firmware");
+                ArtikCloudClientTest.LOGGER.info("update firmware");
                 
                 try {
                     Thread.sleep(1000);

@@ -136,7 +136,8 @@ public abstract class Device extends Resource {
 
     @Override
     public WriteResponse write(int resourceId, LwM2mResource value) {
-        switch (DeviceEnum.values()[resourceId]) {
+        DeviceEnum resource = DeviceEnum.values()[resourceId];
+        switch (resource) {
         case CURRENT_TIME:
             return WriteResponse.notFound();
         case UTC_OFFSET:
@@ -146,7 +147,8 @@ public abstract class Device extends Resource {
             setTimeZone((String) value.getValue(), true);
             return WriteResponse.success();
         default:
-            return super.write(resourceId, value);
+            setResourceValue(resource, value, false);
+            return WriteResponse.success();
         }
     }
 
