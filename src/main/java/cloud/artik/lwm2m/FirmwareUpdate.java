@@ -3,6 +3,8 @@ package cloud.artik.lwm2m;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.STATE;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_RESULT;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_SUPPORTED_OBJECTS;
+import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_NAME;
+import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_VERSION;
 
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.response.ExecuteResponse;
@@ -170,8 +172,43 @@ public abstract class FirmwareUpdate extends Resource {
         return FirmwareUpdateState.values()[((Long) this.resources.get(STATE).getValue()).intValue() - 1];
     }
     
+    /*
+     * Indicates current state with respect to this firmware update. This value is set by the LWM2M Client.
+     * 1: Idle (before downloading or after updating)
+     * 2: Downloading (The data sequence is on the way)
+     * 3: Downloaded
+     * 
+     * If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package URI the state changes to Downloaded.
+     * If writing an empty string to Package Resource is done or writing an empty string to Package URI is done, the state changes to Idle.
+     * If performing the Update Resource failed, the state remains at Downloaded.
+     * If performing the Update Resource was successful, the state changes from Downloaded to Idle.
+     */
     protected void setState(FirmwareUpdateState state, boolean fireResourceChange) {
         setResourceValue(STATE, state.getStateAsLong(), fireResourceChange);
+    }
+    
+    /**
+     * Indicates the current name of the package
+     * @return
+     */
+    public String getPkgName() {
+        return (String) this.resources.get(PKG_NAME).getValue();
+    }
+    
+    protected void setPkgName(String pkgName, boolean fireResourceChange) {
+        setResourceValue(PKG_NAME, pkgName, fireResourceChange);
+    }
+    
+    /**
+     * Indicates the current version of the package
+     * @return
+     */
+    public String getPkgVersion() {
+        return (String) this.resources.get(PKG_VERSION).getValue();
+    }
+    
+    protected void setPkgVersion(String pkgVersion, boolean fireResourceChange) {
+        setResourceValue(PKG_VERSION, pkgVersion, fireResourceChange);
     }
     
     /*

@@ -17,7 +17,9 @@ public enum FirmwareUpdateEnum implements Lwm2mEnum {
                                  // of Objects and Object Instances parameter by sending an Update or Registration 
                                  // message after the firmware update operation at the next practical opportunity 
                                  // if supported Objects in the LWM2M Client have changed
-    UPDATE_RESULT(5) // Contains the result of downloading or updating the firmware.
+    UPDATE_RESULT(5), // Contains the result of downloading or updating the firmware.
+    PKG_NAME(6), // Package Name
+    PKG_VERSION(7) // Package Version
     ;
 
     private final int resourceId;
