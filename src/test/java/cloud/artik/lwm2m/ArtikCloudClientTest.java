@@ -72,8 +72,11 @@ public class ArtikCloudClientTest {
                     
                 }
                 
+                this.setPkgName("DUMMY_PKG", true);
+                this.setPkgVersion("1.0.1", true);
                 // Firmware Downloaded
                 this.firmwareVersion = "1.0.1"; // Hard-coded, should be obtained from the contents of the package
+
                 return FirmwareUpdateResult.SUCCESS;
             }
             

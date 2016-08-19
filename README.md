@@ -29,13 +29,68 @@ Before using the LWM2M SDK to managing your devices, you need to first enable de
 After a device has been created in Artik Cloud, you need to create the device token and use the deviceId and deviceToken to instantiate the LWM2M Client as below:
 
 ~~~
-        Device device = new Device("<Manufacturer>", "<ModelNumber>", "<SerialNumber>", SupportedBinding.UDP);
+        Device device = new Device("<Manufacturer>", "<ModelNumber>", "<SerialNumber>", SupportedBinding.UDP) {
+            
+            @Override
+            public ExecuteResponse executeReboot() {
+                System.out.println("executeReboot called");
+                return ExecuteResponse.success();
+            }
+            
+            @Override
+            public ExecuteResponse executeFactoryReset() {
+                System.out.println("executeFactoryReset called");
+                return ExecuteResponse.success();
+            }
+            
+            @Override
+            protected ExecuteResponse executeResetErrorCode() {
+                System.out.println("executeResetErrorCode called");
+                return super.executeResetErrorCode();
+            }
+        };
         ArtikCloudClient client = new ArtikCloudClient("<DeviceID>", "<DeviceToken>", device);
-        // Start the registration process
-        client.start();
 ~~~
 
 You can use a binding mode of UDP or TCP while registering the device.
+
+To support FirmwareUpdates, you need to subclass FirmwareUpdate to provide concrete implementation of the downloadPackage and updateFirmware execute methods:
+~~~
+
+        // FirmwareUpdate
+        FirmwareUpdate dummyUpdater = new FirmwareUpdate() {
+            
+            @Override
+            public FirmwareUpdateResult downloadPackage(String packageUri) {
+                System.out.println("download package: " + packageUri);
+                this.setPkgName("<PKG_NAME>", true);
+                this.setPkgVersion("<PKG_VERSION>", true);
+                return FirmwareUpdateResult.SUCCESS;
+            }
+            
+            @Override
+            public FirmwareUpdateResult executeUpdateFirmware() {
+                System.out.println("update firmware");
+                return FirmwareUpdateResult.SUCCESS;
+            }
+        };
+        client.setFirmwareUpdate(dummyUpdater);
+~~~
+
+Finally, you need to start the registration process. 
+
+~~~
+        // Register
+        client.start();
+        
+        // Sleep for 10 seconds for the registration to complete
+        Thread.sleep(60000);
+        
+        // De-Register
+        client.stop(true);
+        // Finish
+        client.close();
+~~~
 
 Peek into [tests](https://github.com/artikcloud/artikcloud-lwm2m-java/tree/master/src/test/java/cloud/artik/lwm2m) for examples about how to use the SDK.
 
