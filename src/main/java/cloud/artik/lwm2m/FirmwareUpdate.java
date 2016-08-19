@@ -113,6 +113,12 @@ public abstract class FirmwareUpdate extends Resource {
             }
             
             return WriteResponse.success();
+        case PKG_NAME:
+            setPkgName((String) value.getValue(), true);
+            return WriteResponse.success();
+        case PKG_VERSION:
+            setPkgVersion((String) value.getValue(), true);
+            return WriteResponse.success();
         default:
             LOGGER.info(" default");
             return super.write(resourceId, value);
@@ -194,7 +200,7 @@ public abstract class FirmwareUpdate extends Resource {
         return (String) this.resources.get(PKG_NAME).getValue();
     }
     
-    protected void setPkgName(String pkgName, boolean fireResourceChange) {
+    public void setPkgName(String pkgName, boolean fireResourceChange) {
         setResourceValue(PKG_NAME, pkgName, fireResourceChange);
     }
     
@@ -206,7 +212,7 @@ public abstract class FirmwareUpdate extends Resource {
         return (String) this.resources.get(PKG_VERSION).getValue();
     }
     
-    protected void setPkgVersion(String pkgVersion, boolean fireResourceChange) {
+    public void setPkgVersion(String pkgVersion, boolean fireResourceChange) {
         setResourceValue(PKG_VERSION, pkgVersion, fireResourceChange);
     }
     
