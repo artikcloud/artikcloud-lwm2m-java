@@ -113,6 +113,10 @@ public abstract class FirmwareUpdate extends Resource {
             }
             
             return WriteResponse.success();
+            
+        case UPDATE_SUPPORTED_OBJECTS:
+            setUpdateSupportedObjects((Boolean) value.getValue(), true);
+            return WriteResponse.success();
         case PKG_NAME:
             setPkgName((String) value.getValue(), true);
             return WriteResponse.success();
