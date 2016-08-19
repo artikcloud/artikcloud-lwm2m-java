@@ -6,6 +6,8 @@ import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_SUPPORTED_OBJECT
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_NAME;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_VERSION;
 
+import java.util.Date;
+
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
@@ -35,6 +37,7 @@ public abstract class FirmwareUpdate extends Resource {
     public FirmwareUpdate() {
         setState(FirmwareUpdateState.IDLE, false);
         setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
+        setUpdateSupportedObjects(Boolean.FALSE, false);
     }
     
     /**
@@ -54,22 +57,18 @@ public abstract class FirmwareUpdate extends Resource {
      * @return FirmwareUpdateResult
      */
     public abstract FirmwareUpdateResult executeUpdateFirmware();
-
-    
+ 
     @Override
     public ReadResponse read(int resourceId) {
-        FirmwareUpdateEnum firmwareUpdate = FirmwareUpdateEnum.values()[resourceId];
-        LOGGER.info("read( resourceId: " + firmwareUpdate + ")");
-        if (this.resources.containsKey(firmwareUpdate)) {
-            LwM2mResource value = this.resources.get(firmwareUpdate);
+        FirmwareUpdateEnum resource = FirmwareUpdateEnum.values()[resourceId];
+        LOGGER.info("read( resourceId: " + resource + ")");
+        if (this.resources.containsKey(resource)) {
+            LwM2mResource value = this.resources.get(resource);
             LOGGER.info("value: " + value);
             return ReadResponse.success(value);
         } else {
-            switch (firmwareUpdate) {
-            default:
-                LOGGER.info(" default");
-                return super.read(resourceId);
-            }
+            LOGGER.info(" default");
+            return super.read(resourceId);
         }
     }
 
@@ -222,11 +221,7 @@ public abstract class FirmwareUpdate extends Resource {
      * 
      */
     public Boolean getUpdateSupportedObjects() {
-        if (this.resources.containsKey(UPDATE_SUPPORTED_OBJECTS)) {
-            return (Boolean) this.resources.get(UPDATE_SUPPORTED_OBJECTS).getValue();
-        } else {
-            return Boolean.FALSE;
-        }
+        return (Boolean) this.resources.get(UPDATE_SUPPORTED_OBJECTS).getValue();
     }
     
     /*
