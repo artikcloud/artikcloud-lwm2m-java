@@ -110,6 +110,6 @@ Also see the ARTIK Cloud blog for tutorials, updates, and more: http://artik.io/
 License and Copyright
 ---------------------
 
-Licensed under the Apache License. See [LICENSE](https://github.com/artikcloud/artikcloud-java/blob/master/LICENSE).
+Licensed under the Apache License. See [LICENSE](LICENSE).
 
 Copyright (c) 2016 Samsung Electronics Co., Ltd.
