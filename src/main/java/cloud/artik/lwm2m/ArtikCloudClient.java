@@ -47,7 +47,7 @@ public class ArtikCloudClient {
     protected int shortServerID = -1;
     protected long lifetime = LwM2mId.SRV_LIFETIME;
     protected boolean notifyWhenDisable = false;
-    protected String serverName = "coap.artik.cloud";
+    protected String serverName = "coap-api.artik.cloud";
 
     protected Device device = null;
     protected Location location = null;
@@ -199,9 +199,9 @@ public class ArtikCloudClient {
             clientTCP.destroy(true);
     }
 
-    public void stop(boolean desregister) {
+    public void stop(boolean deregister) {
         if (client != null)
-            client.stop(desregister);
+            client.stop(deregister);
 
         if (clientTCP != null)
             clientTCP.stop();
