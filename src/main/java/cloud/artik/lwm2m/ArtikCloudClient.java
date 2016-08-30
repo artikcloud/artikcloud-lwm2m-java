@@ -167,6 +167,14 @@ public class ArtikCloudClient {
                 // Start the tcp client
                 clientTCP.start();
             }
+        } else {
+            if (client != null) {
+                client.start();
+            } 
+            
+            if (clientTCP != null) {
+                clientTCP.start();
+            }
         }
     }
 
