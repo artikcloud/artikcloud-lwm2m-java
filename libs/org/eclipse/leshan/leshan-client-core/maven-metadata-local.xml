@@ -4,8 +4,8 @@
   <artifactId>leshan-client-core</artifactId>
   <versioning>
     <versions>
-      <version>0.1.11-SNAPSHOT</version>
+      <version>0.1.11-M12-ARTIK-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160720165947</lastUpdated>
+    <lastUpdated>20160914220939</lastUpdated>
   </versioning>
 </metadata>

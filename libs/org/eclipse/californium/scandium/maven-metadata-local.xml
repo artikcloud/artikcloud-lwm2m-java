@@ -4,8 +4,8 @@
   <artifactId>scandium</artifactId>
   <versioning>
     <versions>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>2.0.X-ARTIK-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160720165800</lastUpdated>
+    <lastUpdated>20160914220924</lastUpdated>
   </versioning>
 </metadata>

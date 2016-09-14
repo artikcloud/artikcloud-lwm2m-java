@@ -4,8 +4,8 @@
   <artifactId>leshan</artifactId>
   <versioning>
     <versions>
-      <version>0.1.11-SNAPSHOT</version>
+      <version>0.1.11-M12-ARTIK-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160720165945</lastUpdated>
+    <lastUpdated>20160914220935</lastUpdated>
   </versioning>
 </metadata>

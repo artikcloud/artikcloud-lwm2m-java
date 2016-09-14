@@ -4,8 +4,8 @@
   <artifactId>parent</artifactId>
   <versioning>
     <versions>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>2.0.X-ARTIK-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160720165752</lastUpdated>
+    <lastUpdated>20160914220920</lastUpdated>
   </versioning>
 </metadata>

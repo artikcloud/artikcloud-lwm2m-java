@@ -11,8 +11,6 @@ import javax.net.ssl.X509TrustManager;
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
-import org.eclipse.leshan.client.californium.LeshanTCPClient;
-import org.eclipse.leshan.client.californium.LeshanTCPClientBuilder;
 import org.eclipse.leshan.client.object.Security;
 import org.eclipse.leshan.client.object.Server;
 import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
@@ -41,7 +39,6 @@ public class ArtikCloudClient {
     private final int serverTCPPort = 5689;
     
     protected LeshanClient client = null;
-    protected LeshanTCPClient clientTCP = null;
     protected String deviceId = null;
     protected String deviceToken = null;
     protected int shortServerID = -1;
@@ -80,7 +77,7 @@ public class ArtikCloudClient {
      * @param lifetime - Specify the lifetime of the registration in seconds.
      * @param notifyWhenDisable - If true, the LWM2M Client stores “Notify” operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline. 
      *                            After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored “Notify” operations to the Server.
-     *                            If false, the LWM2M Client discards all the “Notify” operationsor temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.
+     *                            If false, the LWM2M Client discards all the “Notify” operations or temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.
      *                            The default value is true. The maximum number of storing Notification per the Server is up to the implementation.
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device, int shortServerID, long lifetime, boolean notifyWhenDisable) {
@@ -101,8 +98,12 @@ public class ArtikCloudClient {
                 throw new NullPointerException("Device is null");
             }
 
-            String coapURL = "coaps://" + serverName + ":" +
-                    ((device.getSupportedBinding() != SupportedBinding.TCP) ? serverUDPPort : serverTCPPort);
+            String coapURL;
+            if (device.getSupportedBinding() == SupportedBinding.TCP) {
+                coapURL = "coaps+tcp://" + serverName + ":" + serverTCPPort;
+            } else {
+                coapURL = "coaps://" + serverName + ":" + serverUDPPort;
+            }
 
             // Initialize object list
             ObjectsInitializer initializer = new ObjectsInitializer();
@@ -132,7 +133,7 @@ public class ArtikCloudClient {
              * this.location); }
              */
             
-            List<LwM2mObjectEnabler> objectEnablers = null;
+            List<LwM2mObjectEnabler> objectEnablers;
             
             if (this.updater != null) {
                 initializer.setInstancesForObject(LwM2mId.FIRMWARE, this.updater);
@@ -149,32 +150,19 @@ public class ArtikCloudClient {
                         LwM2mId.DEVICE);
             }
 
-            if (device.getSupportedBinding() != SupportedBinding.TCP) {
-                // Create udp client
-                LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
-                builder.setObjects(objectEnablers);
-                client = builder.build();
-
-                // Start the udp client
-                client.start();
-            } else {
-                // Create the tcp client
-                LeshanTCPClientBuilder builder = new LeshanTCPClientBuilder(deviceId, serverName, serverTCPPort);
-                builder.setObjects(objectEnablers);
-                builder.secure().setSSLContext(getTLSContext()).configure().configure();
-                clientTCP = builder.build();
-
-                // Start the tcp client
-                clientTCP.start();
-            }
-        } else {
-            if (client != null) {
-                client.start();
-            } 
+            LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
+            builder.setObjects(objectEnablers);
             
-            if (clientTCP != null) {
-                clientTCP.start();
+            if (device.getSupportedBinding() == SupportedBinding.TCP) {
+                builder.setSSLContext(getTLSContext());
             }
+            
+            client = builder.build();
+
+            // Start the client
+            client.start();
+        } else {
+            client.start();
         }
     }
 
@@ -202,25 +190,17 @@ public class ArtikCloudClient {
     public void close() {
         if (client != null)
             client.destroy(true);
-
-        if (clientTCP != null)
-            clientTCP.destroy(true);
     }
 
     public void stop(boolean deregister) {
         if (client != null)
             client.stop(deregister);
-
-        if (clientTCP != null)
-            clientTCP.stop();
     }
 
     public String getRegistrationId() {
         if (client != null) {
             return client.getRegistrationId();
-        } else if (clientTCP != null) {
-            return clientTCP.getRegistrationId();
-        }
+        } 
         return null;
     }
 
