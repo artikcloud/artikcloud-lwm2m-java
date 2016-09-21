@@ -2,28 +2,28 @@
 <metadata modelVersion="1.1.0">
   <groupId>org.eclipse.leshan</groupId>
   <artifactId>leshan-client-core</artifactId>
-  <version>0.1.11-M12-ARTIK-SNAPSHOT</version>
+  <version>0.1.11-M13-ARTIK-SNAPSHOT</version>
   <versioning>
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
-    <lastUpdated>20160914220939</lastUpdated>
+    <lastUpdated>20160920221805</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <classifier>sources</classifier>
         <extension>jar</extension>
-        <value>0.1.11-M12-ARTIK-SNAPSHOT</value>
-        <updated>20160914220939</updated>
+        <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
+        <updated>20160920221805</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>0.1.11-M12-ARTIK-SNAPSHOT</value>
-        <updated>20160914220939</updated>
+        <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
+        <updated>20160920221805</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>0.1.11-M12-ARTIK-SNAPSHOT</value>
-        <updated>20160914220939</updated>
+        <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
+        <updated>20160920221805</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>

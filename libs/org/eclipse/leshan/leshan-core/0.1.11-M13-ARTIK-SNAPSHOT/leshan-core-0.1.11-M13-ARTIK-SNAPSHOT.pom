@@ -22,8 +22,7 @@ Contributors:
     <parent>
         <groupId>org.eclipse.leshan</groupId>
         <artifactId>leshan</artifactId>
-        <!-- <version>0.1.11-M12</version> JOMA -->
-        <version>0.1.11-M12-ARTIK-SNAPSHOT</version>
+        <version>0.1.11-M13-ARTIK-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-core</artifactId>
     <packaging>bundle</packaging>

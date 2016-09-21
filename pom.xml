@@ -246,7 +246,7 @@
     <dependency>
     	<groupId>org.eclipse.leshan</groupId>
     	<artifactId>leshan-client-cf</artifactId>
-    	<version>0.1.11-M12-ARTIK-SNAPSHOT</version>
+    	<version>0.1.11-M13-ARTIK-SNAPSHOT</version>
     </dependency>
     
       <!-- runtime dependencies -->
