@@ -188,8 +188,15 @@ public class ArtikCloudClient {
     }
     
     public void close() {
-        if (client != null)
-            client.destroy(true);
+        if (client != null) {
+            try {
+                client.destroy(true);
+            } catch (NullPointerException npe){
+                if (device.getSupportedBinding() != SupportedBinding.TCP) {
+                    throw npe;
+                }
+            }
+        }
     }
 
     public void stop(boolean deregister) {
