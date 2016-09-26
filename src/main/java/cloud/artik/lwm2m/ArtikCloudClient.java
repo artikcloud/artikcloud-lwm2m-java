@@ -34,6 +34,8 @@ import cloud.artik.lwm2m.enums.SupportedBinding;
  */
 public class ArtikCloudClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtikCloudClient.class);
+    
+    public final static int DEFAULT_LIFETIME = 300;
 
     private final int serverUDPPort = 5686;
     private final int serverTCPPort = 5689;
@@ -52,7 +54,7 @@ public class ArtikCloudClient {
 
     /**
      * Initialize the LWM2M Client with the DeviceId and the DeviceToken. 
-     * This sets the shortServerID to a random Integer, the lifetime to LwM2mId.SRV_LIFETIME
+     * This sets the shortServerID to a random Integer, the lifetime to DEFAULT_LIFETIME (300 seconds)
      * and notifyWhenDisable to true.
      * 
      * Start the registration process with start().
@@ -62,7 +64,7 @@ public class ArtikCloudClient {
      * @param device
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device) {
-        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE),  LwM2mId.SRV_LIFETIME, true);
+        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE),  DEFAULT_LIFETIME, true);
     }
     
     /**
