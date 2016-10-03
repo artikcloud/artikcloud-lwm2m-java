@@ -5,14 +5,14 @@ import org.eclipse.leshan.core.request.BindingMode;
 /**
  * Specifies the binding Style - 
  *  - U: UDP
- *  - C: TCP
+ *  - T: TCP
  *  
  * @author Maneesh Sahu
  *
  */
 public enum SupportedBinding {
     UDP("U"),
-    TCP("C")
+    TCP("T")
     ;
     private final String bindingId;
     private SupportedBinding(String bindingId) {
@@ -27,7 +27,7 @@ public enum SupportedBinding {
         if (bindingId.equalsIgnoreCase("U")) {
             return BindingMode.U;
         } else {
-            return BindingMode.C;
+            return BindingMode.T;
         }
     }
 }
