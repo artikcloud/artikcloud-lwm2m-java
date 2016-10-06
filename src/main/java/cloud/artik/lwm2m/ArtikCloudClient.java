@@ -39,7 +39,8 @@ public class ArtikCloudClient {
     public final static int DEFAULT_LIFETIME = 300;
 
     private final int serverUDPPort = 5686;
-    private final int serverTCPPort = 5689;
+    private final int serverTCPPort = 5688;
+    private final int serverTLSPort = 5689;
 
     protected LeshanClient client = null;
     protected String deviceId = null;
@@ -48,6 +49,7 @@ public class ArtikCloudClient {
     protected long lifetime = LwM2mId.SRV_LIFETIME;
     protected boolean notifyWhenDisable = false;
     protected String serverName = "coap-api.artik.cloud";
+    protected SSLContext sslContext = null;
 
     protected Device device = null;
     protected Location location = null;
@@ -90,6 +92,7 @@ public class ArtikCloudClient {
         this.shortServerID = shortServerID;
         this.lifetime = lifetime;
         this.notifyWhenDisable = notifyWhenDisable;
+        this.sslContext = getTLSContext();
     }
 
     /**
@@ -103,7 +106,11 @@ public class ArtikCloudClient {
 
             String coapURL;
             if (device.getSupportedBinding() == SupportedBinding.TCP) {
-                coapURL = "coaps+tcp://" + serverName + ":" + serverTCPPort;
+                if (sslContext == null) {
+                    coapURL = "coap+tcp://" + serverName + ":" + serverTCPPort;
+                } else {
+                    coapURL = "coaps+tcp://" + serverName + ":" + serverTLSPort;
+                }
             } else {
                 coapURL = "coaps://" + serverName + ":" + serverUDPPort;
             }
@@ -122,14 +129,32 @@ public class ArtikCloudClient {
                             device.getSupportedBinding().toBindingMode(),
                             this.notifyWhenDisable));
 
-            initializer.setInstancesForObject(
-                    LwM2mId.SECURITY,
-                    Security.psk(
-                            coapURL,
-                            this.shortServerID,
-                            deviceId.getBytes(),
-                            Hex.decodeHex(deviceToken.toCharArray())));
-            
+            if (device.getSupportedBinding() == SupportedBinding.TCP) {
+                if (sslContext == null) {
+                    initializer.setInstancesForObject(
+                            LwM2mId.SECURITY,
+                            Security.tcp(
+                                    coapURL,
+                                    this.shortServerID
+                            ));
+                } else {
+                    initializer.setInstancesForObject(
+                            LwM2mId.SECURITY,
+                            Security.tls(
+                                    coapURL,
+                                    this.shortServerID
+                            ));
+                }
+            } else {
+                initializer.setInstancesForObject(
+                        LwM2mId.SECURITY,
+                        Security.psk(
+                                coapURL,
+                                this.shortServerID,
+                                deviceId.getBytes(),
+                                Hex.decodeHex(deviceToken.toCharArray())));
+            }
+
             /*
              * LOCATION is not supported right now. if (location != null) {
              * initializer.setInstancesForObject(LwM2mId.LOCATION,
@@ -159,9 +184,9 @@ public class ArtikCloudClient {
             Map<String, String> additionalAttributes = new HashMap<String, String>();
             additionalAttributes.put("token", this.deviceToken);
             builder.setAdditionalAttributes(additionalAttributes);
-            
-            if (device.getSupportedBinding() == SupportedBinding.TCP) {
-                builder.setSSLContext(getTLSContext());
+
+            if (device.getSupportedBinding() == SupportedBinding.TCP && sslContext != null) {
+                builder.setSSLContext(sslContext);
             }
 
             client = builder.build();
@@ -227,18 +252,18 @@ public class ArtikCloudClient {
             TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
                         @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        public X509Certificate[] getAcceptedIssuers() {
                             return new X509Certificate[0];
                         }
 
                         @Override
                         public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
+                                X509Certificate[] certs, String authType) {
                         }
 
                         @Override
                         public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
+                                X509Certificate[] certs, String authType) {
                         }
                     }
             };
@@ -250,5 +275,9 @@ public class ArtikCloudClient {
         }
 
         return sslContext;
+    }
+
+    public void setNoSec() {
+        sslContext = null;
     }
 }
