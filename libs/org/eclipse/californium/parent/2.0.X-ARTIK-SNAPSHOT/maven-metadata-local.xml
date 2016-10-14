@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata modelVersion="1.1.0">
-  <groupId>org.eclipse.leshan</groupId>
-  <artifactId>leshan</artifactId>
-  <version>0.1.11-M13-ARTIK-SNAPSHOT</version>
+  <groupId>org.eclipse.californium</groupId>
+  <artifactId>parent</artifactId>
+  <version>2.0.X-ARTIK-SNAPSHOT</version>
   <versioning>
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
-    <lastUpdated>20161013233636</lastUpdated>
+    <lastUpdated>20161014150820</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
-        <updated>20161013233636</updated>
+        <value>2.0.X-ARTIK-SNAPSHOT</value>
+        <updated>20161014150820</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>

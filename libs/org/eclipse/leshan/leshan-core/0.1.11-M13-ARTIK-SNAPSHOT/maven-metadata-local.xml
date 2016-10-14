@@ -7,23 +7,23 @@
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
-    <lastUpdated>20161006171745</lastUpdated>
+    <lastUpdated>20161013233643</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <classifier>sources</classifier>
         <extension>jar</extension>
         <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
-        <updated>20161006171745</updated>
+        <updated>20161013233643</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>jar</extension>
         <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
-        <updated>20161006171745</updated>
+        <updated>20161013233643</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
         <value>0.1.11-M13-ARTIK-SNAPSHOT</value>
-        <updated>20161006171745</updated>
+        <updated>20161013233643</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
