@@ -55,8 +55,6 @@ public class ArtikCloudClientTest {
         device.setAvailablePowerSources(availablePowerSources, false);
 
         ArtikCloudClient client = new ArtikCloudClient("1340f16ae1614c3194d04282b10da588", "8e74dacc0d5c44a7a50cef844322cf7f", device);
-        // TBD: Remove when PROD push
-        //client.setServerName("coap-dev.artik.cloud");
         
         // FirmwareUpdate
         FirmwareUpdate dummyUpdater = new FirmwareUpdate() {

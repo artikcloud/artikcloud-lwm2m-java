@@ -54,6 +54,27 @@ After a device has been created in Artik Cloud, you need to create the device to
 
 You can use a binding mode of UDP or TCP while registering the device.
 
+If using TCP binding mode you will need to additionally add Artik Cloud intermediate certs to your Java system CACert.
+These certificates can be downloaded in PEM format from the following links:
+
+VeriSign Class 3 Public Primary Certification Authority - G5: [pca3-g5ss.crt](http://www.tbs-internet.com/verisign/pca3-g5ss.crt)
+
+Symantec Class 3 ECC 256 bit SSL CA - G2: [rc.crt](http://symantec.tbs-certificats.com/rc.crt)
+
+Use the following commands to get and load the PEMs into the Java system CACert:
+
+~~~
+$
+$ # Download certs
+$ wget http://www.tbs-internet.com/verisign/pca3-g5ss.crt
+$ wget http://symantec.tbs-certificats.com/rc.crt
+$
+$ # Load certs
+$ keytool -importcert -alias "verisignclass3ppg5ca" -file pca3-g5ss.crt -keystore cacerts -storepass changeit -trustcacerts -noprompt
+$ keytool -importcert -alias "verisignclass3eccg2ca" -file rc.crt -keystore cacerts -storepass changeit -trustcacerts -noprompt
+$
+~~~
+
 To support FirmwareUpdates, you need to subclass FirmwareUpdate to provide concrete implementation of the downloadPackage and updateFirmware execute methods:
 ~~~
 
