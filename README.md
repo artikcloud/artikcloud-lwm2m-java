@@ -24,7 +24,8 @@ If using Eclipse,
 Usage
 ------
 
-Before using the LWM2M SDK to managing your devices, you need to first enable device management on your Device Type. <INSERT LINK TO DOCUMENTATION HERE>.
+Before using the LWM2M SDK to managing your devices, you need to first enable device management on your Device Type. <https://developer.artik.cloud/documentation/advanced-features/device-management.html>.
+
 
 After a device has been created in Artik Cloud, you need to create the device token and use the deviceId and deviceToken to instantiate the LWM2M Client as below:
 
