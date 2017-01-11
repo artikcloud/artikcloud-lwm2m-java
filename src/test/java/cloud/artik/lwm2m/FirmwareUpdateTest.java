@@ -43,42 +43,6 @@ public class FirmwareUpdateTest {
         device.setFirmwareVersion(initialFirmwareVersion, true);
     }
 
-    @Test
-    public void SampleClient() {
-
-        ArtikCloudClient client = new ArtikCloudClient("86f7cca4e77647cc83794d072c51007d", "995b107d1ad04473b50ebf3105cb49e7", device);
-        client.setServerName("localhost");
-
-        firmwareUpdate = new FirmwareUpdate() {
-            @Override
-            public FirmwareUpdateResult downloadPackage(String packageUri) {
-                try {
-                    System.out.println("Downloading the image...........");
-                    Thread.sleep(2000);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                return FirmwareUpdateResult.SUCCESS;
-            }
-
-            @Override
-            public FirmwareUpdateResult executeUpdateFirmware() {
-                return FirmwareUpdateResult.SUCCESS;
-            }
-        };
-
-        client.setFirmwareUpdate(firmwareUpdate);
-
-        client.start();
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     public long getCurrentState(FirmwareUpdate firmwareUpdate) {
         ReadResponse readResponse = firmwareUpdate.read(FirmwareUpdateEnum.STATE.getResourceId());
         assertNotNull(readResponse);
