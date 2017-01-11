@@ -6,8 +6,7 @@ import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_SUPPORTED_OBJECT
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_NAME;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_VERSION;
 
-import java.util.Date;
-
+import cloud.artik.lwm2m.exception.ConnectionLostException;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
@@ -47,7 +46,7 @@ public abstract class FirmwareUpdate extends Resource {
      *        As soon the device has received the Package URI it performs the download at the next practical opportunity.
      * @return FirmwareUpdateResult
      */
-    public abstract FirmwareUpdateResult downloadPackage(String packageUri);
+    public abstract FirmwareUpdateResult downloadPackage(String packageUri) throws Exception;
     
     /**
      * This methods needs to be overridden, to update the firmware using the firmware package.
@@ -93,7 +92,7 @@ public abstract class FirmwareUpdate extends Resource {
                             setState(FirmwareUpdateState.DOWNLOADING, false);
                             setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
                             fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
-            
+
                             // Download the resource
                             FirmwareUpdateResult result = downloadPackage(packageUri);
                             
@@ -104,7 +103,11 @@ public abstract class FirmwareUpdate extends Resource {
                                 setState(FirmwareUpdateState.IDLE, false);
                             }
                             fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
-                        } catch (Exception exc) {
+                        } catch (ConnectionLostException cle){
+                            setState(FirmwareUpdateState.IDLE, false);
+                            setUpdateResult(FirmwareUpdateResult.CONNECTION_LOST, true);
+                        }
+                        catch (Exception exc) {
                             LOGGER.error("Error Downloading Package URI " + packageUri, exc);
                             setUpdateResult(FirmwareUpdateResult.FAILED, true);                       
                         }
@@ -153,7 +156,8 @@ public abstract class FirmwareUpdate extends Resource {
                         if (result == FirmwareUpdateResult.SUCCESS) {
                             setState(FirmwareUpdateState.IDLE, true);
                         }
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         setUpdateResult(FirmwareUpdateResult.FAILED, true);
                     }
                 }
