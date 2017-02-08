@@ -96,35 +96,33 @@ public abstract class FirmwareUpdate extends Resource {
                             // Download the resource
                             FirmwareUpdateResult result = downloadPackage(packageUri);
                             
-                            setUpdateResult(result, false);                            
-                            if (result == FirmwareUpdateResult.SUCCESS) {                           
+                            if (result == FirmwareUpdateResult.DEFAULT || result == FirmwareUpdateResult.SUCCESS) {
                                 setState(FirmwareUpdateState.DOWNLOADED, false);
+                                setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
                             } else {
                                 setState(FirmwareUpdateState.IDLE, false);
+                                setUpdateResult(result, false);
                             }
                             fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
                         } catch (ConnectionLostException cle){
                             setState(FirmwareUpdateState.IDLE, false);
-                            setUpdateResult(FirmwareUpdateResult.CONNECTION_LOST, true);
+                            setUpdateResult(FirmwareUpdateResult.CONNECTION_LOST, false);
+                            fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
                         }
-                        catch (Exception exc) {
-                            LOGGER.error("Error Downloading Package URI " + packageUri, exc);
-                            setUpdateResult(FirmwareUpdateResult.FAILED, true);                       
+                        catch (Exception e) {
+                            LOGGER.error("Error Downloading Package URI " + packageUri, e);
+                            setState(FirmwareUpdateState.IDLE, false);
+                            setUpdateResult(FirmwareUpdateResult.FAILED, false);
+                            fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
                         }
                     }
-                }).start();      
+                }).start();
             }
             
             return WriteResponse.success();
             
         case UPDATE_SUPPORTED_OBJECTS:
             setUpdateSupportedObjects((Boolean) value.getValue(), true);
-            return WriteResponse.success();
-        case PKG_NAME:
-            setPkgName((String) value.getValue(), true);
-            return WriteResponse.success();
-        case PKG_VERSION:
-            setPkgVersion((String) value.getValue(), true);
             return WriteResponse.success();
         default:
             LOGGER.info(" default");
@@ -150,15 +148,25 @@ public abstract class FirmwareUpdate extends Resource {
                 public void run() {
                     // perform upgrade
                     try {
+                        setState(FirmwareUpdateState.UPDATING, false);
+                        setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
+                        fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
+                        
                         FirmwareUpdateResult result = executeUpdateFirmware();
                             
-                        setUpdateResult(result, true);
-                        if (result == FirmwareUpdateResult.SUCCESS) {
-                            setState(FirmwareUpdateState.IDLE, true);
+                        if (result == FirmwareUpdateResult.DEFAULT || result == FirmwareUpdateResult.SUCCESS) {
+                            setState(FirmwareUpdateState.IDLE, false);
+                            setUpdateResult(FirmwareUpdateResult.SUCCESS, false);
+                        } else {
+                            setState(FirmwareUpdateState.DOWNLOADED, false);
+                            setUpdateResult(result, false);
                         }
-                    }
-                    catch (Exception e) {
-                        setUpdateResult(FirmwareUpdateResult.FAILED, true);
+                        fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
+                    } catch (Exception e) {
+                        LOGGER.error("Error applying update", e);
+                        setState(FirmwareUpdateState.DOWNLOADED, false);
+                        setUpdateResult(FirmwareUpdateResult.FAILED, false);
+                        fireResourcesChange(STATE.getResourceId(), UPDATE_RESULT.getResourceId());
                     }
                 }
             }).start();

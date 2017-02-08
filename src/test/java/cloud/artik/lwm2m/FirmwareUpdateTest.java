@@ -66,7 +66,7 @@ public class FirmwareUpdateTest {
                         e.printStackTrace();
                     }
 
-                    return FirmwareUpdateResult.SUCCESS;
+                    return FirmwareUpdateResult.DEFAULT;
                 }
 
                 @Override
