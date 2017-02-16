@@ -180,29 +180,37 @@ public abstract class FirmwareUpdate extends Resource {
     
     /*
      * Indicates current state with respect to this firmware update. This value is set by the LWM2M Client.
-     * 1: Idle (before downloading or after updating)
-     * 2: Downloading (The data sequence is on the way)
-     * 3: Downloaded
+     * 0: Idle (before downloading or after updating)
+     * 1: Downloading (The data sequence is on the way)
+     * 2: Downloaded
+     * 3: Updating
      * 
-     * If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package URI the state changes to Downloaded.
-     * If writing an empty string to Package Resource is done or writing an empty string to Package URI is done, the state changes to Idle.
-     * If performing the Update Resource failed, the state remains at Downloaded.
-     * If performing the Update Resource was successful, the state changes from Downloaded to Idle.
+     * If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package
+     *   URI the state changes to Downloaded.
+     * Writing an empty string to Package Resource or to Package URI Resource, resets the Firmware Update State Machine: the State Resource
+     *   value is set to Idle and the Update Result Resource value is set to 0.
+     * When in Downloaded state, and the executable Resource Update is triggered, the state changes to Updating.
+     * If the Update Resource failed, the state returns at Downloaded.
+     * If performing the Update Resource was successful, the state changes from Updating to Idle.
      */
     public FirmwareUpdateState getState() {
-        return FirmwareUpdateState.values()[((Long) this.resources.get(STATE).getValue()).intValue() - 1];
+        return FirmwareUpdateState.values()[((Long) this.resources.get(STATE).getValue()).intValue()];
     }
     
     /*
      * Indicates current state with respect to this firmware update. This value is set by the LWM2M Client.
-     * 1: Idle (before downloading or after updating)
-     * 2: Downloading (The data sequence is on the way)
-     * 3: Downloaded
+     * 0: Idle (before downloading or after updating)
+     * 1: Downloading (The data sequence is on the way)
+     * 2: Downloaded
+     * 3: Updating
      * 
-     * If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package URI the state changes to Downloaded.
-     * If writing an empty string to Package Resource is done or writing an empty string to Package URI is done, the state changes to Idle.
-     * If performing the Update Resource failed, the state remains at Downloaded.
-     * If performing the Update Resource was successful, the state changes from Downloaded to Idle.
+     * If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package
+     *   URI the state changes to Downloaded.
+     * Writing an empty string to Package Resource or to Package URI Resource, resets the Firmware Update State Machine: the State Resource
+     *   value is set to Idle and the Update Result Resource value is set to 0.
+     * When in Downloaded state, and the executable Resource Update is triggered, the state changes to Updating.
+     * If the Update Resource failed, the state returns at Downloaded.
+     * If performing the Update Resource was successful, the state changes from Updating to Idle.
      */
     protected void setState(FirmwareUpdateState state, boolean fireResourceChange) {
         setResourceValue(STATE, state.getStateAsLong(), fireResourceChange);
