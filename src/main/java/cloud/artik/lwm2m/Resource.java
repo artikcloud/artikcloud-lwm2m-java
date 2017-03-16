@@ -1,7 +1,8 @@
 package cloud.artik.lwm2m;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.core.node.LwM2mMultipleResource;
@@ -17,7 +18,7 @@ import cloud.artik.lwm2m.enums.Lwm2mEnum;
  * 
  */
 abstract class Resource extends BaseInstanceEnabler {
-    protected final HashMap<Lwm2mEnum, LwM2mResource> resources = new HashMap<Lwm2mEnum, LwM2mResource>();
+    protected final Map<Lwm2mEnum, LwM2mResource> resources = new ConcurrentHashMap<Lwm2mEnum, LwM2mResource>();
 
     protected void updateResources(int... resourceIds) {
         fireResourcesChange(resourceIds);
@@ -66,7 +67,7 @@ abstract class Resource extends BaseInstanceEnabler {
     }
 
     protected void setResourceValue(Lwm2mEnum resource,
-            HashMap<Integer, Long> value, boolean fireResourceChange) {
+            Map<Integer, Long> value, boolean fireResourceChange) {
         LwM2mResource rValue = LwM2mMultipleResource.newIntegerResource(
                 resource.getResourceId(), value);
         setResourceValue(resource, rValue, fireResourceChange);

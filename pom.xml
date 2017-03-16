@@ -5,7 +5,7 @@
   <artifactId>artikcloud-lwm2m</artifactId>
   <packaging>jar</packaging>
   <name>artikcloud-lwm2m</name>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <description>Artik Cloud LWM2M Java SDK</description>
   <url>https://github.com/artikcloud/artikcloud-lwm2m-java</url>
 
