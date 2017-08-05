@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>org.eclipse.leshan</groupId>
+  <artifactId>leshan</artifactId>
+  <version>0.1.11-M13-2-ARTIK-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <lastUpdated>20170805002503</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>0.1.11-M13-2-ARTIK-SNAPSHOT</value>
+        <updated>20170805002503</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

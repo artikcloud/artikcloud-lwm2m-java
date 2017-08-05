@@ -85,6 +85,16 @@
             <version>2.6.1</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.57</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.57</version>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>
@@ -96,7 +106,7 @@
         <dependency>
             <groupId>org.eclipse.leshan</groupId>
             <artifactId>leshan-client-cf</artifactId>
-            <version>0.1.11-M13-ARTIK</version>
+            <version>0.1.11-M13-2-ARTIK-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -187,8 +197,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>

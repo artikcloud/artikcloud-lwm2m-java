@@ -1,13 +1,19 @@
 package cloud.artik.lwm2m;
 
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.leshan.LwM2mId;
@@ -48,8 +54,9 @@ public class ArtikCloudClient {
     protected int shortServerID = -1;
     protected long lifetime = LwM2mId.SRV_LIFETIME;
     protected boolean notifyWhenDisable = false;
-    protected String serverName = "coap-api.artik.cloud";
+    protected String serverName = "coaps-api.artik.cloud";
     protected SSLContext sslContext = null;
+    protected KeyConfig keyConfig = null;
 
     protected Device device = null;
     protected Location location = null;
@@ -67,28 +74,48 @@ public class ArtikCloudClient {
      * @param device
      */
     public ArtikCloudClient(String deviceId, String deviceToken, Device device) {
-        this(deviceId, deviceToken, device, new Random().nextInt(Integer.MAX_VALUE), DEFAULT_LIFETIME, true);
+        this(deviceId, deviceToken, device, null, new Random().nextInt(Integer.MAX_VALUE), DEFAULT_LIFETIME,
+                true);
     }
-
+    
     /**
-     * Initialize the LWM2M Client with the DeviceId, DeviceToken, shortServerId, lifetime and notifyWhenDisable.
+     * Initialize the LWM2M Client with the DeviceId and the DeviceToken.
+     * This sets the shortServerID to a random Integer, the lifetime to DEFAULT_LIFETIME (300 seconds)
+     * and notifyWhenDisable to true.
      * <p>
      * Start the registration process with start().
      *
      * @param deviceId
      * @param deviceToken
      * @param device
+     * @param keyConfig Set the key config to use device certificates
+     */
+    public ArtikCloudClient(String deviceId, String deviceToken, Device device, KeyConfig keyConfig) {
+        this(deviceId, deviceToken, device, keyConfig, new Random().nextInt(Integer.MAX_VALUE),
+                DEFAULT_LIFETIME, true);
+    }
+
+    /**
+     * Initialize the LWM2M Client with the DeviceId, DeviceToken, shortServerId, lifetime and
+     * notifyWhenDisable.
+     * <p>
+     * Start the registration process with start().
+     *
+     * @param deviceId
+     * @param deviceToken
+     * @param device
+     * @param keyConfig         - Used to enable device certificates
      * @param shortServerID     - Used as link to associate server Object Instance (1-65535)
      * @param lifetime          - Specify the lifetime of the registration in seconds.
-     * @param notifyWhenDisable - If true, the LWM2M Client stores “Notify” operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline.
-     *                          After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored “Notify” operations to the Server.
-     *                          If false, the LWM2M Client discards all the “Notify” operations or temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.
-     *                          The default value is true. The maximum number of storing Notification per the Server is up to the implementation.
+     * @param notifyWhenDisable - If true, the LWM2M Client stores “Notify” operations to the LWM2M Server
+     *                            while the LWM2M Server account is disabled or the LWM2M Client is offline.
      */
-    public ArtikCloudClient(String deviceId, String deviceToken, Device device, int shortServerID, long lifetime, boolean notifyWhenDisable) {
+    public ArtikCloudClient(String deviceId, String deviceToken, Device device, KeyConfig keyConfig,
+            int shortServerID, long lifetime, boolean notifyWhenDisable) {
         this.deviceId = deviceId;
         this.deviceToken = deviceToken;
         this.device = device;
+        this.keyConfig = keyConfig;
         this.shortServerID = shortServerID;
         this.lifetime = lifetime;
         this.notifyWhenDisable = notifyWhenDisable;
@@ -146,20 +173,31 @@ public class ArtikCloudClient {
                             ));
                 }
             } else {
-                initializer.setInstancesForObject(
-                        LwM2mId.SECURITY,
-                        Security.psk(
-                                coapURL,
-                                this.shortServerID,
-                                deviceId.getBytes(),
-                                Hex.decodeHex(deviceToken.toCharArray())));
+                // PSK
+                if (keyConfig == null) {
+                    initializer.setInstancesForObject(
+                            LwM2mId.SECURITY,
+                            Security.psk(
+                                    coapURL,
+                                    this.shortServerID,
+                                    deviceId.getBytes(),
+                                    Hex.decodeHex(deviceToken.toCharArray())));
+                // Certificate
+                } else {
+                    try {
+                        X509Certificate clientCert = keyConfig.getClientCertificate();
+                        PrivateKey privateKey = keyConfig.getPrivateKey();
+                        X509Certificate serverCert = keyConfig.getServerCertificate();
+                        Security security = Security.certificate(coapURL, this.shortServerID,
+                                clientCert.getEncoded(), privateKey.getEncoded(), serverCert.getEncoded());
+                        initializer.setInstancesForObject(
+                                LwM2mId.SECURITY,
+                                security);
+                    } catch (CertificateEncodingException e) {
+                        throw new IllegalArgumentException("Certificate encoding error", e);
+                    }
+                }
             }
-
-            /*
-             * LOCATION is not supported right now. if (location != null) {
-             * initializer.setInstancesForObject(LwM2mId.LOCATION,
-             * this.location); }
-             */
 
             List<LwM2mObjectEnabler> objectEnablers;
 
@@ -197,15 +235,6 @@ public class ArtikCloudClient {
             client.start();
         }
     }
-
-    /*
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }*/
 
     public FirmwareUpdate getFirmwareUpdate() {
         return updater;
@@ -245,13 +274,62 @@ public class ArtikCloudClient {
 
     private SSLContext getTLSContext() {
         SSLContext sslContext = null;
+        
+        if (keyConfig == null) {
+            // Install the all-trusting trust manager
+            try {
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, null, null);
+                
+                // Create a trust manager that does not validate certificate chains
+                TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
 
-        // Install the all-trusting trust manager
-        try {
-            sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, null, null);
-        } catch (Exception e) {
-            //
+                        @Override
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+                };
+
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            } catch (Exception e) {
+                LOGGER.error("Exception initializing SSL context", e);
+            }
+        } else {
+            // Configure the client certificate and trusted server root certificate
+            try {
+                KeyStore keystore = KeyStore.getInstance("JKS");
+                keystore.load(null);
+                X509Certificate clientCert = keyConfig.getClientCertificate();
+                keystore.setCertificateEntry("client", clientCert);
+                keystore.setKeyEntry("key", keyConfig.getPrivateKey(), "changeit".toCharArray(), new Certificate[]{clientCert});
+    
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keystore, "changeit".toCharArray());
+                
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                ks.load(null); // You don't need the KeyStore instance to come from a file.
+                X509Certificate rootCert = keyConfig.getServerCertificate();
+                ks.setCertificateEntry("server-root", rootCert);
+                tmf.init(ks);
+              
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
+            } catch (Exception e) {
+                LOGGER.error("Exception initializing SSL context", e);
+            }
         }
 
         return sslContext;
