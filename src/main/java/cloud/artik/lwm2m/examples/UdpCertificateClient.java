@@ -32,7 +32,7 @@ public class UdpCertificateClient extends BaseCertificateClient {
     
     public void run() throws IOException {
         final String deviceId = "a7edc44d39fb4435a96852e182410459";
-        final String deviceToken = "a5b116a701aa449ba9f1ced58053785c";
+        final String deviceToken = null;
         
         final Device device = new Device("ArtikCloud", "1", "1", SupportedBinding.UDP) {
             @Override
