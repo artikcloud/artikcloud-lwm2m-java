@@ -205,14 +205,21 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
                     <filters>
                         <filter>
                             <artifact>org.eclipse.leshan:leshan-core</artifact>
                             <excludes>
                                 <exclude>oma-objects-spec.json</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>org.bouncycastle:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
                             </excludes>
                         </filter>
                     </filters>
