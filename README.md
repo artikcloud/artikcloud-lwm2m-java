@@ -27,7 +27,7 @@ Peek into [examples](https://github.com/artikcloud/artikcloud-lwm2m-java/tree/ma
 
 To run the example TcpClient class:
 ```
-mvn exec:java -Dexec.mainClass="cloud.artik.lwm2m.examples.TcpClient"
+mvn compile exec:java -Dexec.mainClass="cloud.artik.lwm2m.examples.TcpClient"
 ```
 
 ### Registration
