@@ -88,12 +88,22 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.57</version>
+            <version>1.58</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.57</version>
+            <version>1.58</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bctls-jdk15on</artifactId>
+            <version>1.58</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.leshan</groupId>
+            <artifactId>leshan-client-cf</artifactId>
+            <version>0.1.11-M13-2-ARTIK-SNAPSHOT</version>
         </dependency>
 
         <!-- test dependencies -->
@@ -102,11 +112,6 @@
             <artifactId>junit</artifactId>
             <version>${junit-version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.leshan</groupId>
-            <artifactId>leshan-client-cf</artifactId>
-            <version>0.1.11-M13-2-ARTIK-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -1,21 +1,8 @@
 package cloud.artik.lwm2m;
 
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
+import cloud.artik.lwm2m.enums.SupportedBinding;
+import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
+import org.eclipse.californium.elements.tcp.CoapTlsUtils;
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
@@ -27,7 +14,16 @@ import org.eclipse.leshan.util.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cloud.artik.lwm2m.enums.SupportedBinding;
+import javax.net.ssl.*;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * This LWM2M Objects provides the data related to a LWM2M Server and also provides the keying material of a LWM2M Client
@@ -278,9 +274,6 @@ public class ArtikCloudClient {
         if (keyConfig == null) {
             // Install the all-trusting trust manager
             try {
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, null, null);
-                
                 // Create a trust manager that does not validate certificate chains
                 TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
@@ -301,8 +294,7 @@ public class ArtikCloudClient {
                     }
                 };
 
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                sslContext = CoapTlsUtils.createSSLContext(null, trustAllCerts);
             } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
@@ -315,18 +307,16 @@ public class ArtikCloudClient {
                 keystore.setCertificateEntry("client", clientCert);
                 keystore.setKeyEntry("key", keyConfig.getPrivateKey(), "changeit".toCharArray(), new Certificate[]{clientCert});
     
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keystore, "changeit".toCharArray());
-                
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                KeyManagerFactory kmf = CoapTlsUtils.createKeyManagerFactory(keystore, "changeit".toCharArray());
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX", BouncyCastleJsseProvider.PROVIDER_NAME);
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
                 ks.load(null); // You don't need the KeyStore instance to come from a file.
                 X509Certificate rootCert = keyConfig.getServerCertificate();
                 ks.setCertificateEntry("server-root", rootCert);
                 tmf.init(ks);
               
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
+                sslContext = CoapTlsUtils.createSSLContext(kmf.getKeyManagers(), tmf.getTrustManagers());
             } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
