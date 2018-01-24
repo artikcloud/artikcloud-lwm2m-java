@@ -78,8 +78,9 @@ public enum DeviceEnum implements Lwm2mEnum {
                          // 4 Low Battery - The battery is low on charge. 
                          // 5 Not Installed - The battery is not installed. 
                          // 6 Unknown - The battery information is not available.
-    MEMORY_TOTAL(21) // Total amount of storage    space which can store data and software 
+    MEMORY_TOTAL(21), // Total amount of storage    space which can store data and software
                      // in the  LWM2M Device (expressed in kilobytes).
+    EXT_DEV_INFO(22) // Reference to external “Device” object instance containing information. For example, such an external device can be a Host Device, which is a device into which the Device containing the LwM2M client is embedded. This Resource may be used to retrieve information about the Host Device.
     ;
 
     private final int resourceId;
