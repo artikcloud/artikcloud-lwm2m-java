@@ -1,8 +1,12 @@
 package cloud.artik.lwm2m;
 
 import cloud.artik.lwm2m.enums.SupportedBinding;
-import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
-import org.eclipse.californium.elements.tcp.CoapTlsUtils;
+import org.eclipse.californium.core.network.CoapEndpoint;
+import org.eclipse.californium.core.network.config.NetworkConfig;
+import org.eclipse.californium.core.observe.ObservationStore;
+import org.eclipse.californium.elements.tcp.TcpClientConnector;
+import org.eclipse.californium.elements.tcp.TlsClientConnector;
+import org.eclipse.californium.scandium.config.DtlsConnectorConfig;
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
@@ -10,11 +14,13 @@ import org.eclipse.leshan.client.object.Security;
 import org.eclipse.leshan.client.object.Server;
 import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
+import org.eclipse.leshan.core.californium.EndpointFactory;
 import org.eclipse.leshan.util.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
+import java.net.InetSocketAddress;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -123,113 +129,127 @@ public class ArtikCloudClient {
      */
     public void start() {
         if (client == null) {
-            if (device == null) {
-                throw new NullPointerException("Device is null");
-            }
-
-            String coapURL;
-            if (device.getSupportedBinding() == SupportedBinding.TCP) {
-                if (sslContext == null) {
-                    coapURL = "coap+tcp://" + serverName + ":" + serverTCPPort;
-                } else {
-                    coapURL = "coaps+tcp://" + serverName + ":" + serverTLSPort;
-                }
-            } else {
-                coapURL = "coaps://" + serverName + ":" + serverUDPPort;
-            }
-
-            // Initialize object list
-            ObjectsInitializer initializer = new ObjectsInitializer();
-
-            // Create common object instances
-            initializer.setInstancesForObject(LwM2mId.DEVICE, this.device);
-
-            initializer.setInstancesForObject(
-                    LwM2mId.SERVER,
-                    new Server(
-                            this.shortServerID,
-                            this.lifetime,
-                            device.getSupportedBinding().toBindingMode(),
-                            this.notifyWhenDisable));
-
-            if (device.getSupportedBinding() == SupportedBinding.TCP) {
-                if (sslContext == null) {
-                    initializer.setInstancesForObject(
-                            LwM2mId.SECURITY,
-                            Security.tcp(
-                                    coapURL,
-                                    this.shortServerID
-                            ));
-                } else {
-                    initializer.setInstancesForObject(
-                            LwM2mId.SECURITY,
-                            Security.tls(
-                                    coapURL,
-                                    this.shortServerID
-                            ));
-                }
-            } else {
-                // PSK
-                if (keyConfig == null) {
-                    initializer.setInstancesForObject(
-                            LwM2mId.SECURITY,
-                            Security.psk(
-                                    coapURL,
-                                    this.shortServerID,
-                                    deviceId.getBytes(),
-                                    Hex.decodeHex(deviceToken.toCharArray())));
-                // Certificate
-                } else {
-                    try {
-                        X509Certificate clientCert = keyConfig.getClientCertificate();
-                        PrivateKey privateKey = keyConfig.getPrivateKey();
-                        X509Certificate serverCert = keyConfig.getServerCertificate();
-                        Security security = Security.certificate(coapURL, this.shortServerID,
-                                clientCert.getEncoded(), privateKey.getEncoded(), serverCert.getEncoded());
-                        initializer.setInstancesForObject(
-                                LwM2mId.SECURITY,
-                                security);
-                    } catch (CertificateEncodingException e) {
-                        throw new IllegalArgumentException("Certificate encoding error", e);
-                    }
-                }
-            }
-
-            List<LwM2mObjectEnabler> objectEnablers;
-
-            if (this.updater != null) {
-                initializer.setInstancesForObject(LwM2mId.FIRMWARE, this.updater);
-
-                objectEnablers = initializer.create(
-                        LwM2mId.SECURITY,
-                        LwM2mId.SERVER,
-                        LwM2mId.DEVICE,
-                        LwM2mId.FIRMWARE);
-            } else {
-                objectEnablers = initializer.create(
-                        LwM2mId.SECURITY,
-                        LwM2mId.SERVER,
-                        LwM2mId.DEVICE);
-            }
-
-            LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
-            builder.setObjects(objectEnablers);
-
-            Map<String, String> additionalAttributes = new HashMap<String, String>();
-            additionalAttributes.put("token", this.deviceToken);
-            builder.setAdditionalAttributes(additionalAttributes);
-
-            if (device.getSupportedBinding() == SupportedBinding.TCP && sslContext != null) {
-                builder.setSSLContext(sslContext);
-            }
-
-            client = builder.build();
-
-            // Start the client
-            client.start();
-        } else {
-            client.start();
+            client = createClient();
         }
+
+        // Start the client
+        client.start();
+    }
+
+    private String getCoapURL() {
+        if (device.getSupportedBinding() == SupportedBinding.TCP) {
+            if (sslContext == null) {
+                return "coap+tcp://" + serverName + ":" + serverTCPPort;
+            } else {
+                return "coaps+tcp://" + serverName + ":" + serverTLSPort;
+            }
+        } else {
+            return "coaps://" + serverName + ":" + serverUDPPort;
+        }
+    }
+
+    private Security getTCPSecurity(String coapURL) {
+        if (sslContext == null) {
+            return Security.tcp(coapURL, this.shortServerID);
+        } else {
+            return Security.tls(coapURL, this.shortServerID);
+        }
+    }
+
+    private Security getUDPSecurity(String coapURL) {
+        if (keyConfig == null) {
+            // PSK
+            return Security.psk(
+                    coapURL,
+                    shortServerID,
+                    deviceId.getBytes(),
+                    Hex.decodeHex(deviceToken.toCharArray()));
+        } else {
+            // Certificate
+            try {
+                X509Certificate clientCert = keyConfig.getClientCertificate();
+                PrivateKey privateKey = keyConfig.getPrivateKey();
+                X509Certificate serverCert = keyConfig.getServerCertificate();
+                return Security.certificate(
+                        coapURL,
+                        shortServerID,
+                        clientCert.getEncoded(),
+                        privateKey.getEncoded(),
+                        serverCert.getEncoded());
+            } catch (CertificateEncodingException e) {
+                throw new IllegalArgumentException("Certificate encoding error", e);
+            }
+        }
+    }
+
+    private boolean isTCPBindingMode() {
+        return device.getSupportedBinding() == SupportedBinding.TCP;
+    }
+
+    private LeshanClient createClient() {
+        if (device == null) {
+            throw new NullPointerException("Device is null");
+        }
+
+        // Initialize object list
+        ObjectsInitializer initializer = new ObjectsInitializer();
+
+        // Create common object instances
+        initializer.setInstancesForObject(LwM2mId.DEVICE, this.device);
+
+        initializer.setInstancesForObject(
+                LwM2mId.SERVER,
+                new Server(
+                        this.shortServerID,
+                        this.lifetime,
+                        device.getSupportedBinding().toBindingMode(),
+                        this.notifyWhenDisable));
+
+        String coapURL = getCoapURL();
+        final Security security;
+        if (isTCPBindingMode()) {
+            security = getTCPSecurity(coapURL);
+        } else {
+            security = getUDPSecurity(coapURL);
+        }
+
+        initializer.setInstancesForObject(LwM2mId.SECURITY, security);
+
+        final List<LwM2mObjectEnabler> objectEnablers;
+        if (this.updater != null) {
+            initializer.setInstancesForObject(LwM2mId.FIRMWARE, this.updater);
+
+            objectEnablers = initializer.create(
+                    LwM2mId.SECURITY,
+                    LwM2mId.SERVER,
+                    LwM2mId.DEVICE,
+                    LwM2mId.FIRMWARE);
+        } else {
+            objectEnablers = initializer.create(
+                    LwM2mId.SECURITY,
+                    LwM2mId.SERVER,
+                    LwM2mId.DEVICE);
+        }
+
+        LeshanClientBuilder builder = new LeshanClientBuilder(deviceId);
+        builder.setObjects(objectEnablers);
+
+        NetworkConfig config = NetworkConfig.createStandardWithoutFile()
+                .setLong(NetworkConfig.Keys.MAX_MESSAGE_SIZE, 16 * 1024)
+                .setInt(NetworkConfig.Keys.PROTOCOL_STAGE_THREAD_COUNT, 2)
+                .setLong(NetworkConfig.Keys.EXCHANGE_LIFETIME, 10000);
+        builder.setCoapConfig(config);
+
+        Map<String, String> additionalAttributes = new HashMap<String, String>();
+        additionalAttributes.put("token", this.deviceToken);
+        builder.setAdditionalAttributes(additionalAttributes);
+
+        if (isTCPBindingMode()) {
+            EndpointFactory endpointFactory = new TCPEndpointFactory(sslContext);
+            builder.setEndpointFactory(endpointFactory);
+        }
+
+        return builder.build();
     }
 
     public FirmwareUpdate getFirmwareUpdate() {
@@ -294,7 +314,8 @@ public class ArtikCloudClient {
                     }
                 };
 
-                sslContext = CoapTlsUtils.createSSLContext(null, trustAllCerts);
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
@@ -306,17 +327,19 @@ public class ArtikCloudClient {
                 X509Certificate clientCert = keyConfig.getClientCertificate();
                 keystore.setCertificateEntry("client", clientCert);
                 keystore.setKeyEntry("key", keyConfig.getPrivateKey(), "changeit".toCharArray(), new Certificate[]{clientCert});
-    
-                KeyManagerFactory kmf = CoapTlsUtils.createKeyManagerFactory(keystore, "changeit".toCharArray());
 
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX", BouncyCastleJsseProvider.PROVIDER_NAME);
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keystore, "changeit".toCharArray());
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
                 ks.load(null); // You don't need the KeyStore instance to come from a file.
                 X509Certificate rootCert = keyConfig.getServerCertificate();
                 ks.setCertificateEntry("server-root", rootCert);
                 tmf.init(ks);
-              
-                sslContext = CoapTlsUtils.createSSLContext(kmf.getKeyManagers(), tmf.getTrustManagers());
+
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
             } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
@@ -327,5 +350,29 @@ public class ArtikCloudClient {
 
     public void setNoSec() {
         sslContext = null;
+    }
+}
+
+class TCPEndpointFactory implements EndpointFactory {
+
+    private final int CONNTECT_TIMEOUT_MILLIS = 100000;
+    private final int IDLE_TIMEOUT_SECONDS = 100;
+
+    private final SSLContext sslContext;
+
+    public TCPEndpointFactory(SSLContext sslContext) {
+        this.sslContext = sslContext;
+    }
+
+    @Override
+    public CoapEndpoint createUnsecuredEndpoint(InetSocketAddress address, NetworkConfig coapConfig, ObservationStore store) {
+        TcpClientConnector connector = new TcpClientConnector(1, CONNTECT_TIMEOUT_MILLIS, IDLE_TIMEOUT_SECONDS);
+        return new CoapEndpoint(connector, coapConfig, store, null);
+    }
+
+    @Override
+    public CoapEndpoint createSecuredEndpoint(DtlsConnectorConfig dtlsConfig, NetworkConfig coapConfig, ObservationStore store) {
+        TlsClientConnector connector = new TlsClientConnector(sslContext,1, CONNTECT_TIMEOUT_MILLIS, IDLE_TIMEOUT_SECONDS);
+        return new CoapEndpoint(connector, coapConfig, store, null);
     }
 }
