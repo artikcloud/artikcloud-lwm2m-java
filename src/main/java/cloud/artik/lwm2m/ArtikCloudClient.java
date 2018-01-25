@@ -1,12 +1,8 @@
 package cloud.artik.lwm2m;
 
 import cloud.artik.lwm2m.enums.SupportedBinding;
-import org.eclipse.californium.core.network.CoapEndpoint;
+import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.eclipse.californium.core.network.config.NetworkConfig;
-import org.eclipse.californium.core.observe.ObservationStore;
-import org.eclipse.californium.elements.tcp.TcpClientConnector;
-import org.eclipse.californium.elements.tcp.TlsClientConnector;
-import org.eclipse.californium.scandium.config.DtlsConnectorConfig;
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
@@ -20,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
-import java.net.InetSocketAddress;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -42,6 +37,7 @@ import java.util.Random;
  * @link http://technical.openmobilealliance.org/tech/profiles/LWM2M_Server-v1_0.xml
  */
 public class ArtikCloudClient {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtikCloudClient.class);
 
     public final static int DEFAULT_LIFETIME = 300;
@@ -314,8 +310,7 @@ public class ArtikCloudClient {
                     }
                 };
 
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                sslContext = TLSUtils.createSSLContext(null, trustAllCerts);
             } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
@@ -328,19 +323,16 @@ public class ArtikCloudClient {
                 keystore.setCertificateEntry("client", clientCert);
                 keystore.setKeyEntry("key", keyConfig.getPrivateKey(), "changeit".toCharArray(), new Certificate[]{clientCert});
 
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keystore, "changeit".toCharArray());
+                KeyManagerFactory kmf = TLSUtils.createKeyManagerFactory(keystore, "changeit".toCharArray());
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX", BouncyCastleJsseProvider.PROVIDER_NAME);
 
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
                 ks.load(null); // You don't need the KeyStore instance to come from a file.
                 X509Certificate rootCert = keyConfig.getServerCertificate();
                 ks.setCertificateEntry("server-root", rootCert);
                 tmf.init(ks);
 
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
-            } catch (Exception e) {
+                sslContext = TLSUtils.createSSLContext(kmf.getKeyManagers(), tmf.getTrustManagers());            } catch (Exception e) {
                 LOGGER.error("Exception initializing SSL context", e);
             }
         }
@@ -350,29 +342,5 @@ public class ArtikCloudClient {
 
     public void setNoSec() {
         sslContext = null;
-    }
-}
-
-class TCPEndpointFactory implements EndpointFactory {
-
-    private final int CONNTECT_TIMEOUT_MILLIS = 100000;
-    private final int IDLE_TIMEOUT_SECONDS = 100;
-
-    private final SSLContext sslContext;
-
-    public TCPEndpointFactory(SSLContext sslContext) {
-        this.sslContext = sslContext;
-    }
-
-    @Override
-    public CoapEndpoint createUnsecuredEndpoint(InetSocketAddress address, NetworkConfig coapConfig, ObservationStore store) {
-        TcpClientConnector connector = new TcpClientConnector(1, CONNTECT_TIMEOUT_MILLIS, IDLE_TIMEOUT_SECONDS);
-        return new CoapEndpoint(connector, coapConfig, store, null);
-    }
-
-    @Override
-    public CoapEndpoint createSecuredEndpoint(DtlsConnectorConfig dtlsConfig, NetworkConfig coapConfig, ObservationStore store) {
-        TlsClientConnector connector = new TlsClientConnector(sslContext,1, CONNTECT_TIMEOUT_MILLIS, IDLE_TIMEOUT_SECONDS);
-        return new CoapEndpoint(connector, coapConfig, store, null);
     }
 }
