@@ -13,7 +13,7 @@ import java.net.InetSocketAddress;
 class TCPEndpointFactory implements EndpointFactory {
 
     private final int CONNTECT_TIMEOUT_MILLIS = 100000;
-    private final int IDLE_TIMEOUT_SECONDS = 100;
+    private final int IDLE_TIMEOUT_SECONDS = 3600;
 
     private final SSLContext sslContext;
 
