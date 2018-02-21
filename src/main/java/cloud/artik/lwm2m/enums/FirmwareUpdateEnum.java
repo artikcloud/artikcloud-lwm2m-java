@@ -13,10 +13,6 @@ public enum FirmwareUpdateEnum implements Lwm2mEnum {
                                 // or, by using the firmware downloaded from the Package URI.
                                 // This Resource is only executable when the value of the State Resource is Downloaded.
     STATE(3),                   // Indicates current state with respect to this firmware update.
-    UPDATE_SUPPORTED_OBJECTS(4),// If this value is true, the LWM2M Client MUST inform the registered LWM2M Servers
-                                // of Objects and Object Instances parameter by sending an Update or Registration
-                                // message after the firmware update operation at the next practical opportunity
-                                // if supported Objects in the LWM2M Client have changed
     UPDATE_RESULT(5),           // Contains the result of downloading or updating the firmware.
     PKG_NAME(6),                // Package Name
     PKG_VERSION(7)              // Package Version
