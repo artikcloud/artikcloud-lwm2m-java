@@ -28,4 +28,17 @@ public enum FirmwareUpdateEnum implements Lwm2mEnum {
     public int getResourceId() {
         return this.resourceId;
     }
+
+    public static FirmwareUpdateEnum valueOf(int id) {
+        switch (id) {
+            case 0: return PACKAGE;
+            case 1: return PACKAGE_URI;
+            case 2: return UPDATE;
+            case 3: return STATE;
+            case 5: return UPDATE_RESULT;
+            case 6: return PKG_NAME;
+            case 7: return PKG_VERSION;
+            default: return null;
+        }
+    }
 }

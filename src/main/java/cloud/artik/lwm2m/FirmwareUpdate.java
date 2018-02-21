@@ -57,7 +57,11 @@ public abstract class FirmwareUpdate extends Resource {
  
     @Override
     public ReadResponse read(int resourceId) {
-        FirmwareUpdateEnum resource = FirmwareUpdateEnum.values()[resourceId];
+        FirmwareUpdateEnum resource = FirmwareUpdateEnum.valueOf(resourceId);
+        if (resource == null) {
+            return ReadResponse.notFound();
+        }
+
         LOGGER.info("read( resourceId: " + resource + ")");
         if (this.resources.containsKey(resource)) {
             LwM2mResource value = this.resources.get(resource);
@@ -71,8 +75,13 @@ public abstract class FirmwareUpdate extends Resource {
 
     @Override
     public WriteResponse write(int resourceId, LwM2mResource value) {
+        FirmwareUpdateEnum resource = FirmwareUpdateEnum.valueOf(resourceId);
+        if (resource == null) {
+            return WriteResponse.notFound();
+        }
+
         LOGGER.info("write " + resourceId + ", " + value);
-        switch (FirmwareUpdateEnum.values()[resourceId]) {
+        switch (resource) {
         case PACKAGE_URI:
             final String packageUri = (String) value.getValue();
             //if (LOGGER.isTraceEnabled()) {
@@ -130,7 +139,12 @@ public abstract class FirmwareUpdate extends Resource {
      */
     @Override
     public ExecuteResponse execute(int resourceId, String params) {
-        switch (FirmwareUpdateEnum.values()[resourceId]) {
+        FirmwareUpdateEnum firmwareUpdateEnum = FirmwareUpdateEnum.valueOf(resourceId);
+        if (firmwareUpdateEnum == null) {
+            return ExecuteResponse.notFound();
+        }
+
+        switch (firmwareUpdateEnum) {
         case UPDATE: 
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Perform Firmware Update");
