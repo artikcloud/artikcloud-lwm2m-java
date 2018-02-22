@@ -40,7 +40,7 @@ public abstract class BaseCertificateClient extends BaseClient {
             cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(is);
         } catch (CertificateException e) {
-            LOGGER.error("failed to load server ca", e);
+            LOGGER.error("failed to load client certificate", e);
             return null;
         }
     }
