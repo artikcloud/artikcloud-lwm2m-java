@@ -3,6 +3,7 @@ package cloud.artik.lwm2m;
 import cloud.artik.lwm2m.enums.SupportedBinding;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.eclipse.californium.core.network.config.NetworkConfig;
+import org.eclipse.californium.scandium.config.DtlsConnectorConfig;
 import org.eclipse.leshan.LwM2mId;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.californium.LeshanClientBuilder;
@@ -243,6 +244,18 @@ public class ArtikCloudClient {
         if (isTCPBindingMode()) {
             EndpointFactory endpointFactory = new TCPEndpointFactory(sslContext);
             builder.setEndpointFactory(endpointFactory);
+        } else if (keyConfig != null) {
+            // udp with certificates
+            X509Certificate trustedCert = keyConfig.getServerCertificate();
+            X509Certificate clientCert = keyConfig.getClientCertificate();
+            PrivateKey privateKey = keyConfig.getPrivateKey();
+
+            DtlsConnectorConfig.Builder configBuilder = new DtlsConnectorConfig.Builder()
+                    .setTrustStore(new X509Certificate[] { trustedCert } )
+                    .setIdentity(privateKey, new X509Certificate[] { clientCert }, false)
+                    .setClientOnly();
+
+            builder.setDtlsConfig(configBuilder);
         }
 
         return builder.build();
