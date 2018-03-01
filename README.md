@@ -7,6 +7,10 @@ Prerequisites
 
  * [Maven](http://maven.apache.org/) or [Maven Integration for Eclipse](https://www.eclipse.org/m2e/)
  * JavaSE 1.7 or above 
+ * [Leshan 1.0.0-M5-ARTIK](https://github.com/artikcloud/leshan/tree/1.0.0-M4-artik)
+ * [Californium 2.0.0-M6-ARTIK](https://github.com/artikcloud/californium/tree/2.0.0-M5-Artik)
+ 
+You will need to have [Leshan 1.0.0-M5-ARTIK](https://github.com/artikcloud/leshan/tree/1.0.0-M4-artik) and [Californium 2.0.0-M6-ARTIK](https://github.com/artikcloud/californium/tree/2.0.0-M5-Artik) in your classpath.
 
 ## Installation
 
