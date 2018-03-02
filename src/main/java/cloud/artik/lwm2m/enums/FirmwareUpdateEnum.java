@@ -39,6 +39,7 @@ public enum FirmwareUpdateEnum implements Lwm2mEnum {
             case 1: return PACKAGE_URI;
             case 2: return UPDATE;
             case 3: return STATE;
+            case 4: return UPDATE_SUPPORTED_OBJECTS;
             case 5: return UPDATE_RESULT;
             case 6: return PKG_NAME;
             case 7: return PKG_VERSION;
