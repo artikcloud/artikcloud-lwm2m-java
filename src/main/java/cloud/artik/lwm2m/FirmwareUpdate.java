@@ -2,6 +2,7 @@ package cloud.artik.lwm2m;
 
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.STATE;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_RESULT;
+import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.UPDATE_SUPPORTED_OBJECTS;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_NAME;
 import static cloud.artik.lwm2m.enums.FirmwareUpdateEnum.PKG_VERSION;
 
@@ -35,6 +36,7 @@ public abstract class FirmwareUpdate extends Resource {
     public FirmwareUpdate() {
         setState(FirmwareUpdateState.IDLE, false);
         setUpdateResult(FirmwareUpdateResult.DEFAULT, false);
+        setUpdateSupportedObjects(Boolean.FALSE, false);
     }
     
     /**
@@ -127,7 +129,10 @@ public abstract class FirmwareUpdate extends Resource {
             }
             
             return WriteResponse.success();
-
+            
+        case UPDATE_SUPPORTED_OBJECTS:
+            setUpdateSupportedObjects((Boolean) value.getValue(), true);
+            return WriteResponse.success();
         default:
             LOGGER.info(" default");
             return super.write(resourceId, value);
@@ -247,6 +252,34 @@ public abstract class FirmwareUpdate extends Resource {
     
     public void setPkgVersion(String pkgVersion, boolean fireResourceChange) {
         setResourceValue(PKG_VERSION, pkgVersion, fireResourceChange);
+    }
+    
+    /*
+     * If this value is true, the LWM2M Client MUST inform the registered LWM2M Servers of Objects and 
+     * Object Instances parameter by sending an Update or Registration message after the firmware update 
+     * operation at the next practical opportunity if supported Objects in the LWM2M Client have changed, 
+     * in order for the LWM2M Servers to promptly manage newly installed Objects.
+     * 
+     * If false, Objects and Object Instances parameter MUST be reported at the next periodic Update 
+     * message. The default value is false.
+     * 
+     */
+    public Boolean getUpdateSupportedObjects() {
+        return (Boolean) this.resources.get(UPDATE_SUPPORTED_OBJECTS).getValue();
+    }
+    
+    /*
+     * If this value is true, the LWM2M Client MUST inform the registered LWM2M Servers of Objects and 
+     * Object Instances parameter by sending an Update or Registration message after the firmware update 
+     * operation at the next practical opportunity if supported Objects in the LWM2M Client have changed, 
+     * in order for the LWM2M Servers to promptly manage newly installed Objects.
+     * 
+     * If false, Objects and Object Instances parameter MUST be reported at the next periodic Update 
+     * message. The default value is false.
+     * 
+     */
+    public void setUpdateSupportedObjects(Boolean updateSupportedObjects, boolean fireResourceChange) {
+        setResourceValue(UPDATE_SUPPORTED_OBJECTS, updateSupportedObjects, fireResourceChange);
     }
     
     /*
