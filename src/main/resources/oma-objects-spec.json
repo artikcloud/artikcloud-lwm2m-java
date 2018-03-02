@@ -734,6 +734,17 @@
         "description": ""
       },
       {
+        "id": 4,
+        "name": "Update Supported Objects",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "boolean",
+        "range": "",
+        "units": "",
+        "description": ""
+      },
+      {
         "id": 5,
         "name": "Update Result",
         "operations": "R",
